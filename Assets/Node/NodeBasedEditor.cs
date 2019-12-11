@@ -319,7 +319,7 @@ namespace XFramewrok.Editor
         }
 
         /// <summary>
-        /// 清楚准备连接的点
+        /// 清除准备连接的点
         /// </summary>
         private void ClearConnectionSelection()
         {
