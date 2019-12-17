@@ -1,0 +1,18 @@
+﻿.mainBody{
+	width: 100px;
+	height: 40px;
+	border-width: 1px;
+    border-color: darkslategray;
+}
+
+.connectPoint{
+	width: 10px;
+	height: 10px;
+	border-width: 1px;
+    border-color: darkslategray;
+}
+
+Node{
+	flex-direction: row;
+	position: absolute;
+}
