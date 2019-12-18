@@ -1,18 +1,70 @@
-﻿.mainBody{
-	width: 100px;
-	height: 40px;
+﻿.title{
+	width: 150px;
+	height: 30px;
 	border-width: 1px;
-    border-color: darkslategray;
+	flex-direction: row;
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	background-color: rgba(40, 41, 44, 0.836);
 }
 
 .connectPoint{
 	width: 10px;
 	height: 10px;
-	border-width: 1px;
-    border-color: darkslategray;
+	border-radius: 100%;
+	background-color: rgb(187, 187, 187);
+	margin-left: 10px;
+	margin-right: 10px;
+	align-self: center;
+}
+
+.content{
+	width: 150;
+	height: auto;
+	flex-direction: column;
+
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.text{
+	font-size: 14px;
+	width: 86;
+	color: white;
+	align-self: center;
+	-unity-text-align: middle-Center;
+}
+
+.input{
+	font-size: 14px;
+	width: 86;
+	background-color: teal;
+	align-self: center;
+	-unity-text-align: middle-Center;
+}
+
+.item{
+	margin-top: 2px;
+	margin-bottom: 2px;
+	width: auto;
 }
 
 Node{
-	flex-direction: row;
+	flex-direction: column;
+	border-width: 1px;
+	background-color: rgba(40, 41, 44, 0.836);
+	border-color: rgba(40, 41, 44, 0.836);
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 4px;
+	border-bottom-left-radius: 4px;
 	position: absolute;
+}
+
+Node:hover{
+	border-color: red;
+}
+
+ListView {
+    flex-grow:1;
 }

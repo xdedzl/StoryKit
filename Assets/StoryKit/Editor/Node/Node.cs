@@ -1,81 +1,106 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace XFramewrok.StoryKit
 {
     public class Node : VisualElement
     {
-        private bool isMove;
         // 用UXML
         public class Fatory : UxmlFactory<Node> { }
 
-        public Node()
+
+        private NodeData m_NodeData;
+
+        private bool isMove;
+        private VisualElement m_ContentUI;
+
+        public Node() { }
+
+        public Node(NodeData nodeData) : this()
         {
-            Image image1 = new Image()
-            {
-                image = AssetDatabase.LoadAssetAtPath<Texture>("Assets/StoryKit/Res/basic.png"),
-                tintColor = Color.white,
+            m_NodeData = nodeData;
 
-                transform =
-                {
-                    position = new Vector3(0,15,0),
-                }
+            VisualElement connectPointIn = new VisualElement();
+            connectPointIn.AddToClassList("connectPoint");
+            VisualElement connectPointOut = new VisualElement();
+            connectPointOut.AddToClassList("connectPoint");
+            Label label = new Label()
+            {
+                text = $"节点",
             };
-            image1.AddToClassList("connectPoint");
+            label.AddToClassList("text");
 
-            Image image2 = new Image()
+            VisualElement title = new VisualElement();
+            title.AddToClassList("title");  
+
+            title.RegisterCallback<MouseMoveEvent>((a) =>
             {
-                image = AssetDatabase.LoadAssetAtPath<Texture>("Assets/StoryKit/Res/basic.png"),
-                tintColor = Color.red,
-
-                transform =
-                {
-                    position = new Vector3(0,0,0),
-                }
-            };
-            image2.AddToClassList("mainBody");
-
-            image2.RegisterCallback<MouseMoveEvent>((a) =>
-            {
-                Debug.Log("MouseMove");
+                //Debug.Log("MouseMove");
                 if (isMove)
                     this.transform.position += (Vector3)a.mouseDelta;
             });
-            image2.RegisterCallback<PointerDownEvent>((a) =>
+            title.RegisterCallback<PointerDownEvent>((a) =>
             {
-                Debug.Log("PointerDownEvent");
+                //Debug.Log("PointerDownEvent");
                 this.BringToFront();
                 isMove = true;
             });
-            image2.RegisterCallback<PointerUpEvent>((a) =>
+            title.RegisterCallback<PointerUpEvent>((a) =>
             {
-                Debug.Log("PointerUpEvent");
+                //Debug.Log("PointerUpEvent");
 
                 isMove = false;
             });
-            image2.RegisterCallback<PointerEnterEvent>((a) =>
+            title.RegisterCallback<PointerEnterEvent>((a) =>
             {
-                Debug.Log("PointerEnterEvent");
+                //Debug.Log("PointerEnterEvent");
 
                 isMove = false;
             });
 
-            Image image3 = new Image()
-            {
-                image = AssetDatabase.LoadAssetAtPath<Texture>("Assets/StoryKit/Res/basic.png"),
-                tintColor = Color.white,
+            title.Add(connectPointIn);
+            title.Add(label);
+            title.Add(connectPointOut);
 
-                transform =
+            title.RegisterCallback<MouseDownEvent>((v) =>
+            {
+                if (v.clickCount == 2)
                 {
-                    position = new Vector3(0,15,0),
+                    if (Contains(m_ContentUI))
+                    {
+                        Remove(m_ContentUI);
+                    }
+                    else
+                    {
+                        Add(m_ContentUI);
+                    }
                 }
-            };
-            image3.AddToClassList("connectPoint");
+            });
 
-            Add(image1);
-            Add(image2);
-            Add(image3);
+            m_ContentUI = new VisualElement();
+            m_ContentUI.AddToClassList("content");
+
+            IntegerField idField = new IntegerField
+            {
+                value = m_NodeData.id,
+            };
+            idField.RegisterValueChangedCallback((v) => { m_NodeData.id = v.newValue; });
+            idField.AddToClassList("item");
+            TextField nameField = new TextField
+            {
+                value = m_NodeData.name,
+            };
+
+            nameField.RegisterValueChangedCallback((v) => { m_NodeData.name = v.newValue; });
+            nameField.AddToClassList("item");
+             
+            m_ContentUI.Add(idField);
+            m_ContentUI.Add(nameField);
+
+            Add(title);
+            Add(m_ContentUI);
         }
     }
 }

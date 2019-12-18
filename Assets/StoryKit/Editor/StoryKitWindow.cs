@@ -1,6 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 namespace XFramewrok.StoryKit
 {
@@ -22,7 +23,7 @@ namespace XFramewrok.StoryKit
         private StyleSheet nodeStyle;
         private void OnEnable()
         {
-            nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss");
+            nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss"); 
 
             var root = rootVisualElement;
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/StoryKitWindow.uss"));
@@ -30,6 +31,7 @@ namespace XFramewrok.StoryKit
             {
                 style =
                 {
+                    
                 }
             };
             root.Add(m_NodeRoot);
@@ -76,7 +78,8 @@ namespace XFramewrok.StoryKit
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Add node"), false, () =>
             {
-                Node node = new Node
+                NodeData nodeData = new NodeData() { id = 1001, name = "傻逼" };
+                Node node = new Node(nodeData)
                 {
                     transform =
                     {
