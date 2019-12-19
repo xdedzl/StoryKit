@@ -49,6 +49,11 @@
 	width: auto;
 }
 
+Label{
+	min-width: 40;
+	color: white;
+}
+
 Node{
 	flex-direction: column;
 	border-width: 1px;

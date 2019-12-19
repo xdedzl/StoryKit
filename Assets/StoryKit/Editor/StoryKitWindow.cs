@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
+using System.Collections.Generic;
 
 namespace XFramewrok.StoryKit
 {
@@ -15,14 +16,19 @@ namespace XFramewrok.StoryKit
             window.titleContent = new GUIContent("StoryKit");
         }
 
+        private StyleSheet nodeStyle;
+
         private Vector2 offset;
         private Vector2 drag;
 
         private VisualElement m_NodeRoot;
 
-        private StyleSheet nodeStyle;
+        private List<Node> m_NodeList;
+
         private void OnEnable()
         {
+            m_NodeList = new List<Node>();
+
             nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss"); 
 
             var root = rootVisualElement;
@@ -40,10 +46,24 @@ namespace XFramewrok.StoryKit
             {
                 DrawGrid(20, 0.2f, Color.gray);
                 DrawGrid(100, 0.4f, Color.gray);
+                //DrawConnect();
 
                 ProcessEvents(Event.current);
             });
             root.Add(imgui);
+
+            Node.onNodeDelete += (n) =>
+            {
+                m_NodeList.Remove(n);
+            };
+            Node.onNextNodeAdd += (node, nextNode) =>
+            {
+                AddNode(nextNode);
+            };
+            Node.onNextNodeAdd += (node, prevNode) =>
+            {
+                AddNode(prevNode);
+            };
         }
 
         private void ProcessEvents(Event e)
@@ -78,7 +98,7 @@ namespace XFramewrok.StoryKit
             GenericMenu genericMenu = new GenericMenu();
             genericMenu.AddItem(new GUIContent("Add node"), false, () =>
             {
-                NodeData nodeData = new NodeData() { id = 1001, name = "傻逼" };
+                NodeData nodeData = NodeManager.CreateNode();
                 Node node = new Node(nodeData)
                 {
                     transform =
@@ -86,10 +106,21 @@ namespace XFramewrok.StoryKit
                         position = mousePosition
                     },
                 };
-                node.styleSheets.Add(nodeStyle);
-                rootVisualElement.Add(node);
+
+                AddNode(node);
             });
             genericMenu.ShowAsContext();
+        }
+
+        /// <summary>
+        /// 添加一个节点
+        /// </summary>
+        /// <param name="node"></param>
+        private void AddNode(Node node)
+        {
+            m_NodeList.Add(node);
+            node.styleSheets.Add(nodeStyle);
+            rootVisualElement.Add(node);
         }
 
         /// <summary>
@@ -121,6 +152,14 @@ namespace XFramewrok.StoryKit
 
             Handles.color = Color.white;
             Handles.EndGUI();
+        }
+
+        private void DrawConnect()
+        {
+            foreach (var item in m_NodeList)
+            {
+                item.DrawConnectLine();
+            }
         }
     }
 }
