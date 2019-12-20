@@ -11,7 +11,6 @@ namespace XFramewrok.StoryKit
         // 用UXML
         public class Fatory : UxmlFactory<Node> { }
 
-
         private NodeData m_NodeData;
 
         private bool isMove;
@@ -20,6 +19,7 @@ namespace XFramewrok.StoryKit
         private VisualElement connectPointOut;
 
         private List<Node> m_NextNodes;
+        private List<Node> m_PrevNodes;
 
         public static event System.Action<Node> onNodeDelete;
         public static event System.Action<Node, Node> onNextNodeAdd;
@@ -31,6 +31,7 @@ namespace XFramewrok.StoryKit
         {
             m_NodeData = nodeData;
             m_NextNodes = new List<Node>();
+            m_PrevNodes = new List<Node>();
             this.RegisterCallback<PointerDownEvent>((a) =>
             {
                 this.BringToFront();
@@ -77,8 +78,6 @@ namespace XFramewrok.StoryKit
             });
             title.RegisterCallback<PointerEnterEvent>((a) =>
             {
-                //Debug.Log("PointerEnterEvent");
-
                 isMove = false;
             });
 
@@ -102,11 +101,7 @@ namespace XFramewrok.StoryKit
                 else if (v.button == 1 && v.clickCount == 1)
                 {
                     GenericMenu genericMenu = new GenericMenu();
-                    genericMenu.AddItem(new GUIContent("Delete"), false, () =>
-                    {
-                        onNodeDelete?.Invoke(this);
-                        this.RemoveFromHierarchy();
-                    });
+                    genericMenu.AddItem(new GUIContent("Delete"), false, Delete);
                     genericMenu.AddItem(new GUIContent("Add Next Node"), false, () =>
                     {
                         NodeData nextData = NodeManager.CreateNode();
@@ -115,13 +110,13 @@ namespace XFramewrok.StoryKit
                         {
                             transform =
                             {
-                                position = this.transform.position + new Vector3(10,10,0),
+                                position = this.transform.position + new Vector3(150,60,0),
                             },
                         };
 
-                        this.m_NextNodes.Add(nextNode);
+                        AddNextNode(nextNode);
 
-                        onNextNodeAdd(this, nextNode);
+                        onNextNodeAdd?.Invoke(this, nextNode);
                     });
                     genericMenu.AddItem(new GUIContent("Add Prev Node"), false, () =>
                     {
@@ -131,13 +126,13 @@ namespace XFramewrok.StoryKit
                         {
                             transform =
                             {
-                                position = this.transform.position - new Vector3(10,10,0),
+                                position = this.transform.position - new Vector3(20,20,0),
                             },
                         };
 
-                        prevNode.m_NextNodes.Add(this);
+                        prevNode.AddNextNode(this);
 
-                        onPrevNodeAdd(this, prevNode);
+                        onPrevNodeAdd?.Invoke(this, prevNode);
                     });
                     genericMenu.ShowAsContext();
                 }
@@ -150,13 +145,6 @@ namespace XFramewrok.StoryKit
             m_ContentUI = new VisualElement();
             m_ContentUI.AddToClassList("content");
 
-            //IntegerField idField = new IntegerField
-            //{
-            //    label = "Id",
-            //    value = m_NodeData.id,
-            //};
-            //idField.RegisterValueChangedCallback((v) => { m_NodeData.id = v.newValue; });
-            //idField.AddToClassList("item");
             TextField nameField = new TextField
             {
                 label = "Name",
@@ -166,46 +154,66 @@ namespace XFramewrok.StoryKit
             nameField.RegisterValueChangedCallback((v) => { m_NodeData.name = v.newValue; });
             nameField.AddToClassList("item");
 
-            //m_ContentUI.Add(idField);
             m_ContentUI.Add(nameField);
 
             #endregion
 
             Add(title);
             Add(m_ContentUI);
+        }
 
-            Add(new IMGUIContainer()
+        private void AddNextNode(Node nextNode)
+        {
+            this.m_NextNodes.Add(nextNode);
+            nextNode.m_PrevNodes.Add(this);
+        }
+
+        private void RemoveNextNode(Node nextNode)
+        {
+            this.m_NextNodes.Remove(nextNode);
+            nextNode.m_PrevNodes.Remove(this);
+        }
+
+        /// <summary>
+        /// 删除自身
+        /// </summary>
+        public void Delete()
+        {
+            onNodeDelete?.Invoke(this);
+            foreach (var item in m_NextNodes)
             {
-                onGUIHandler = () => { DrawConnectLine(); },
-                style =
-                {
-                    position = Position.Absolute,
-                }
-            });
+                item.m_PrevNodes.Remove(this);
+            }
+            m_NextNodes.Clear();
+            foreach (var item in m_PrevNodes)
+            {
+                item.m_NextNodes.Remove(this);
+            }
+            m_PrevNodes.Clear();
+            this.RemoveFromHierarchy();
         }
 
         public void DrawConnectLine()
         {
             foreach (var item in m_NextNodes)
             {
-                //Handles.DrawBezier(
-                //    connectPointOut.transform.position,
-                //    item.connectPointIn.transform.position,
-                //    connectPointOut.transform.position + (Vector3)Vector2.left * 50f,
-                //    item.connectPointIn.transform.position - (Vector3)Vector2.left * 50f,
-                //    Color.white,
-                //    null,
-                //    2f
-                //);
-                Handles.DrawLine(
-                   connectPointOut.transform.position,
-                   item.connectPointIn.transform.position
+                Handles.DrawBezier(
+                    GetPos(this.connectPointOut),
+                    GetPos(item.connectPointIn),
+                    GetPos(this.connectPointOut) + Vector2.left * 50f,
+                    GetPos(item.connectPointIn) - Vector2.left * 50f,
+                    Color.white,
+                    null,
+                    2f
                 );
 
-                Debug.Log($"{connectPointOut.transform.position}:{item.connectPointIn.transform.position}");
-                
                 GUI.changed = true;
             }
+        }
+
+        private Vector2 GetPos(VisualElement visualElement)
+        {
+            return visualElement.worldBound.position;
         }
     }
 }

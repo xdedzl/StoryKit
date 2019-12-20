@@ -33,24 +33,19 @@ namespace XFramewrok.StoryKit
 
             var root = rootVisualElement;
             root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/StoryKitWindow.uss"));
-            m_NodeRoot = new VisualElement
-            {
-                style =
-                {
-                    
-                }
-            };
+            m_NodeRoot = new VisualElement();
             root.Add(m_NodeRoot);
 
             IMGUIContainer imgui = new IMGUIContainer(() =>
             {
                 DrawGrid(20, 0.2f, Color.gray);
                 DrawGrid(100, 0.4f, Color.gray);
-                //DrawConnect();
 
                 ProcessEvents(Event.current);
             });
             root.Add(imgui);
+
+            root.Add(m_NodeRoot);
 
             Node.onNodeDelete += (n) =>
             {
@@ -60,10 +55,17 @@ namespace XFramewrok.StoryKit
             {
                 AddNode(nextNode);
             };
-            Node.onNextNodeAdd += (node, prevNode) =>
+            Node.onPrevNodeAdd += (node, prevNode) =>
             {
                 AddNode(prevNode);
             };
+
+            IMGUIContainer drawLine = new IMGUIContainer(() =>
+            {
+                DrawConnectLine();
+            });
+
+            rootVisualElement.Add(drawLine);
         }
 
         private void ProcessEvents(Event e)
@@ -120,7 +122,7 @@ namespace XFramewrok.StoryKit
         {
             m_NodeList.Add(node);
             node.styleSheets.Add(nodeStyle);
-            rootVisualElement.Add(node);
+            m_NodeRoot.Add(node);
         }
 
         /// <summary>
@@ -154,7 +156,10 @@ namespace XFramewrok.StoryKit
             Handles.EndGUI();
         }
 
-        private void DrawConnect()
+        /// <summary>
+        /// 画连接线
+        /// </summary>
+        private void DrawConnectLine()
         {
             foreach (var item in m_NodeList)
             {
