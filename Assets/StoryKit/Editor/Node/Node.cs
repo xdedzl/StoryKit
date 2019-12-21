@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 
 namespace XFramewrok.StoryKit
 {
@@ -11,12 +12,12 @@ namespace XFramewrok.StoryKit
         // 用UXML
         public class Fatory : UxmlFactory<Node> { }
 
-        private NodeData m_NodeData;
+        public NodeData data { get; private set; }
 
         private bool isMove;
         private VisualElement m_ContentUI;
-        private VisualElement connectPointIn;
-        private VisualElement connectPointOut;
+        private ConnectPoint connectPointIn;
+        private ConnectPoint connectPointOut;
 
         private List<Node> m_NextNodes;
         private List<Node> m_PrevNodes;
@@ -29,7 +30,7 @@ namespace XFramewrok.StoryKit
 
         public Node(NodeData nodeData) : this()
         {
-            m_NodeData = nodeData;
+            data = nodeData;
             m_NextNodes = new List<Node>();
             m_PrevNodes = new List<Node>();
             this.RegisterCallback<PointerDownEvent>((a) =>
@@ -41,12 +42,17 @@ namespace XFramewrok.StoryKit
 
             #region 连接点
 
-            connectPointIn = new VisualElement();
+            connectPointIn = new ConnectPoint(this, Point.In);
             connectPointIn.AddToClassList("connectPoint");
             connectPointIn.RegisterCallback<PointerDownEvent>((a) => { a.StopPropagation(); });
-            connectPointOut = new VisualElement();
+            connectPointOut = new ConnectPoint(this, Point.Out);
             connectPointOut.AddToClassList("connectPoint");
             connectPointOut.RegisterCallback<PointerDownEvent>((a) => { a.StopPropagation(); });
+
+            connectPointOut.RegisterCallback<MouseUpEvent>((a) =>
+            {
+                Debug.Log('a');
+            });
 
             #endregion
 
@@ -61,19 +67,15 @@ namespace XFramewrok.StoryKit
 
             title.RegisterCallback<MouseMoveEvent>((a) =>
             {
-                //Debug.Log("MouseMove");
                 if (isMove)
                     this.transform.position += (Vector3)a.mouseDelta;
             });
             title.RegisterCallback<PointerDownEvent>((a) =>
             {
-                //Debug.Log("PointerDownEvent");
                 isMove = true;
             });
             title.RegisterCallback<PointerUpEvent>((a) =>
             {
-                //Debug.Log("PointerUpEvent");
-
                 isMove = false;
             });
             title.RegisterCallback<PointerEnterEvent>((a) =>
@@ -104,7 +106,7 @@ namespace XFramewrok.StoryKit
                     genericMenu.AddItem(new GUIContent("Delete"), false, Delete);
                     genericMenu.AddItem(new GUIContent("Add Next Node"), false, () =>
                     {
-                        NodeData nextData = NodeManager.CreateNode();
+                        NodeData nextData = NodeManager.CreateNodeData();
 
                         Node nextNode = new Node(nextData)
                         {
@@ -120,7 +122,7 @@ namespace XFramewrok.StoryKit
                     });
                     genericMenu.AddItem(new GUIContent("Add Prev Node"), false, () =>
                     {
-                        NodeData prevData = NodeManager.CreateNode();
+                        NodeData prevData = NodeManager.CreateNodeData();
 
                         Node prevNode = new Node(prevData)
                         {
@@ -148,10 +150,10 @@ namespace XFramewrok.StoryKit
             TextField nameField = new TextField
             {
                 label = "Name",
-                value = m_NodeData.name,
+                value = data.name,
             };
 
-            nameField.RegisterValueChangedCallback((v) => { m_NodeData.name = v.newValue; });
+            nameField.RegisterValueChangedCallback((v) => { data.name = v.newValue; });
             nameField.AddToClassList("item");
 
             m_ContentUI.Add(nameField);
@@ -162,13 +164,13 @@ namespace XFramewrok.StoryKit
             Add(m_ContentUI);
         }
 
-        private void AddNextNode(Node nextNode)
+        public void AddNextNode(Node nextNode)
         {
             this.m_NextNodes.Add(nextNode);
             nextNode.m_PrevNodes.Add(this);
         }
 
-        private void RemoveNextNode(Node nextNode)
+        public void RemoveNextNode(Node nextNode)
         {
             this.m_NextNodes.Remove(nextNode);
             nextNode.m_PrevNodes.Remove(this);
@@ -193,15 +195,26 @@ namespace XFramewrok.StoryKit
             this.RemoveFromHierarchy();
         }
 
+        /// <summary>
+        /// 获取所有的后续节点
+        /// </summary>
+        public Node[] GetNextNodes()
+        {
+            return m_NextNodes.ToArray();
+        }
+
         public void DrawConnectLine()
         {
             foreach (var item in m_NextNodes)
             {
+                Vector2 p1 = GetPos(this.connectPointOut);
+                Vector2 p2 = GetPos(item.connectPointIn);
+
                 Handles.DrawBezier(
-                    GetPos(this.connectPointOut),
-                    GetPos(item.connectPointIn),
-                    GetPos(this.connectPointOut) + Vector2.left * 50f,
-                    GetPos(item.connectPointIn) - Vector2.left * 50f,
+                    p1,
+                    p2,
+                    p1 + Vector2.left * 50f,
+                    p2 - Vector2.left * 50f,
                     Color.white,
                     null,
                     2f

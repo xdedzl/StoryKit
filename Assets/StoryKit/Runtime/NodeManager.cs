@@ -60,7 +60,7 @@ namespace XFramewrok.StoryKit
         /// 创建一个节点
         /// </summary>
         /// <returns></returns>
-        public static NodeData CreateNode()
+        public static NodeData CreateNodeData()
         {
             return instance.CreateNodeInternal();
         }
