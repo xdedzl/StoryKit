@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 using System.Collections.Generic;
+using System;
 
 namespace XFramewrok.StoryKit
 {
@@ -107,18 +108,19 @@ namespace XFramewrok.StoryKit
 
                         if(ConnectPoint.StartPoint != null)
                         {
-                            Node node = CreateNode(e.mousePosition);
-
-                            if(ConnectPoint.StartPoint.point == Point.In)
+                            ShowCreateNodeMenu(e.mousePosition, "", (node) =>
                             {
-                                node.AddNextNode(ConnectPoint.StartPoint.node);
-                            }
-                            else
-                            {
-                                ConnectPoint.StartPoint.node.AddNextNode(node);
-                            }
+                                if (ConnectPoint.StartPoint.point == Point.In)
+                                {
+                                    node.AddNextNode(ConnectPoint.StartPoint.node);
+                                }
+                                else
+                                {
+                                    ConnectPoint.StartPoint.node.AddNextNode(node);
+                                }
 
-                            ConnectPoint.ClearLine();
+                                ConnectPoint.ClearLine();
+                            });
                         }
                     }
 
@@ -150,26 +152,31 @@ namespace XFramewrok.StoryKit
             }
         }
 
+        /// <summary>
+        /// 菜单
+        /// </summary>
+        /// <param name="mousePosition"></param>
         private void ProcessContextMenu(Vector2 mousePosition)
         {
-            GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Add node"), false, () =>
-            {
-                CreateNode(mousePosition);
-            });
-            genericMenu.ShowAsContext();
+            ShowCreateNodeMenu(mousePosition, "Add Node");
         }
 
-        private Node CreateNode(Vector2 pos)
+        /// <summary>
+        /// 根据类型创建节点
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        private Node CreateNode(Type type, Vector2 pos)
         {
-            return CreateNode(pos, NodeManager.CreateNodeData());
+            return CreateNode(NodeManager.CreateNodeData(type), pos);
         }
 
         /// <summary>
         /// 创建一个节点
         /// </summary>
         /// <param name="pos"></param>
-        private Node CreateNode(Vector2 pos, NodeData nodeData)
+        private Node CreateNode(NodeData nodeData, Vector2 pos)
         {
             Node node = new Node(nodeData)
             {
@@ -253,11 +260,35 @@ namespace XFramewrok.StoryKit
             }
         }
 
+        /// <summary>
+        /// 节点创建菜单
+        /// </summary>
+        /// <param name="postion">节点位置</param>
+        /// <param name="path">菜单路径</param>
+        /// <param name="callback">创建完成回调</param>
+        private void ShowCreateNodeMenu(Vector2 postion, string path = "", Action<Node> callback = null)
+        {
+            path = string.IsNullOrEmpty(path) ? "" : path + "/";
+
+            GenericMenu genericMenu = new GenericMenu();
+
+            foreach (var item in XFramework.StoryKit.Utility.GetSonTypes(typeof(NodeData)))
+            {
+                genericMenu.AddItem(new GUIContent($"{path}{item.Name}"), false, () =>
+                {
+                    Node node = CreateNode(item, postion);
+                    callback?.Invoke(node);
+                });
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
         #region 数据
 
         private void SaveAsset()
         {
-            string fileName = EditorUtility.SaveFilePanel("保存路径", Application.dataPath, "NewNodeDatas", ".json");
+            string fileName = EditorUtility.SaveFilePanel("保存路径", Application.dataPath, "NewNodeDatas", "json");
 
             List<SerializableNodeData> serializableNodeDatas = new List<SerializableNodeData>();
             foreach (var node in m_NodeList)
@@ -288,7 +319,7 @@ namespace XFramewrok.StoryKit
 
         private void OpenAsset()
         {
-            string fileName = EditorUtility.OpenFilePanel("打开路径", Application.dataPath, ".json");
+            string fileName = EditorUtility.OpenFilePanel("打开路径", Application.dataPath, "json");
 
             string json = System.IO.File.ReadAllText(fileName);
 
@@ -297,7 +328,7 @@ namespace XFramewrok.StoryKit
             Dictionary<int, Node> dataDic = new Dictionary<int, Node>();
             foreach (var item in datas)
             {
-                Node node = CreateNode(item.postion, item.nodeData);
+                Node node = CreateNode(item.nodeData, item.postion);
                 dataDic.Add(item.nodeData.id, node);
             }
 

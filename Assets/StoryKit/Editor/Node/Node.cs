@@ -9,9 +9,6 @@ namespace XFramewrok.StoryKit
 {
     public class Node : VisualElement
     {
-        // 用UXML
-        public class Fatory : UxmlFactory<Node> { }
-
         public NodeData data { get; private set; }
 
         private bool isMove;
@@ -26,9 +23,7 @@ namespace XFramewrok.StoryKit
         public static event System.Action<Node, Node> onNextNodeAdd;
         public static event System.Action<Node, Node> onPrevNodeAdd;
 
-        public Node() { }
-
-        public Node(NodeData nodeData) : this()
+        public Node(NodeData nodeData)
         {
             data = nodeData;
             m_NextNodes = new List<Node>();
@@ -147,16 +142,64 @@ namespace XFramewrok.StoryKit
             m_ContentUI = new VisualElement();
             m_ContentUI.AddToClassList("content");
 
-            TextField nameField = new TextField
+            // 处理节点内容
+            var fields = data.GetType().GetFields();
+            foreach (var field in fields)
             {
-                label = "Name",
-                value = data.name,
-            };
+                var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
+                if (attribute != null)
+                {
+                    if (attribute is TextFieldAttribute)
+                    {
+                        TextField textField = new TextField
+                        {
+                            label = field.Name,
+                            value = field.GetValue(data) as string,
+                        };
+                        textField.RegisterValueChangedCallback((v) => { field.SetValue(data, v.newValue); });
+                        textField.AddToClassList("item");
+                        m_ContentUI.Add(textField);
+                    }
+                    else if(attribute is TextureAttribute)
+                    {
+                        var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
+                        ObjectField imageFiled = new ObjectField
+                        {
+                            objectType = typeof(Texture),
+                            value = tex,
+                        };
+                        imageFiled.AddToClassList("item");
 
-            nameField.RegisterValueChangedCallback((v) => { data.name = v.newValue; });
-            nameField.AddToClassList("item");
+                        Image preview = new Image
+                        {
+                            image = tex,
+                            scaleMode = ScaleMode.StretchToFill
+                        };
+                        preview.AddToClassList("item");
 
-            m_ContentUI.Add(nameField);
+                        imageFiled.RegisterValueChangedCallback((v) =>
+                        {
+                            Texture texture = v.newValue as Texture;
+                            if (v != null)
+                            {
+                                string path = AssetDatabase.GetAssetPath(v.newValue);
+                                field.SetValue(data, path);
+
+                                float ratio = (float)texture.height / texture.width;
+
+                                preview.style.height = preview.layout.width * ratio;
+                            }
+                            else
+                            {
+                                field.SetValue(data, null);
+                            }
+                            preview.image = v.newValue as Texture;
+                        });
+                        m_ContentUI.Add(imageFiled);
+                        m_ContentUI.Add(preview);
+                    }
+                }
+            }
 
             #endregion
 

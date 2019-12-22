@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -34,7 +35,6 @@ namespace XFramewrok.StoryKit
 
         private NodeManager()
         {
-            Debug.Log("...");
             m_IdPools = new List<int>();
 
             m_NodeDataDic = new Dictionary<int, NodeData>(); 
@@ -53,6 +53,24 @@ namespace XFramewrok.StoryKit
             return nodeData;
         }
 
+        private NodeData CreateNodeInternal(Type type)
+        {
+            if (type.IsSubclassOf(typeof(NodeData)))
+            {
+                NodeData nodeData = Activator.CreateInstance(type) as NodeData;
+                nodeData.id = instance.Id;
+                nodeData.name = "新节点";
+
+                m_NodeDataDic.Add(nodeData.id, nodeData);
+
+                return nodeData;
+            }
+            else
+            {
+                throw new Exception("[NodeData Create Error] 类型错误");
+            }
+        }
+
 
         #region Static 调用
 
@@ -63,6 +81,11 @@ namespace XFramewrok.StoryKit
         public static NodeData CreateNodeData()
         {
             return instance.CreateNodeInternal();
+        }
+
+        public static NodeData CreateNodeData(Type type)
+        {
+            return instance.CreateNodeInternal(type);
         }
 
         /// <summary>
