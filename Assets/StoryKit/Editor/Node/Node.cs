@@ -1,9 +1,10 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
-using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 
 namespace XFramewrok.StoryKit
 {
@@ -143,7 +144,7 @@ namespace XFramewrok.StoryKit
             m_ContentUI.AddToClassList("content");
 
             // 处理节点内容
-            var fields = data.GetType().GetFields();
+            var fields = GetFields(data.GetType());
             foreach (var field in fields)
             {
                 var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
@@ -160,11 +161,12 @@ namespace XFramewrok.StoryKit
                         textField.AddToClassList("item");
                         m_ContentUI.Add(textField);
                     }
-                    else if(attribute is TextureAttribute)
+                    else if (attribute is TextureAttribute)
                     {
                         var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
                         ObjectField imageFiled = new ObjectField
                         {
+                            label = field.Name,
                             objectType = typeof(Texture),
                             value = tex,
                         };
@@ -270,6 +272,27 @@ namespace XFramewrok.StoryKit
         private Vector2 GetPos(VisualElement visualElement)
         {
             return visualElement.worldBound.position;
+        }
+
+        /// <summary>
+        /// 对获得FieldInfos排序
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private List<FieldInfo> GetFields(Type type)
+        {
+            List<FieldInfo> result = new List<FieldInfo>();
+
+            do
+            {
+                var temp = new List<FieldInfo>(type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                temp.AddRange(result);
+                result = temp;
+                type = type.BaseType;
+            }
+            while (type != typeof(NodeData).BaseType);
+
+            return result;
         }
     }
 }

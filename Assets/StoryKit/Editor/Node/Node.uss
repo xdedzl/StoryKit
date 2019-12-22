@@ -47,7 +47,10 @@
 	margin-top: 2px;
 	margin-bottom: 2px;
 	width: auto;
-	height: auto
+	height: auto;
+}
+
+.item Label{
 }
 
 Label{
