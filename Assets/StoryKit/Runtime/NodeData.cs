@@ -11,3 +11,4 @@ public class NodeData
 public class NodeElemnetAttribute : System.Attribute { }
 public class TextFieldAttribute : NodeElemnetAttribute { }
 public class TextureAttribute : NodeElemnetAttribute { }
+public class ClassFieldAttribute : NodeElemnetAttribute { }

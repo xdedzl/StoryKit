@@ -45,11 +45,6 @@ namespace XFramewrok.StoryKit
             connectPointOut.AddToClassList("connectPoint");
             connectPointOut.RegisterCallback<PointerDownEvent>((a) => { a.StopPropagation(); });
 
-            connectPointOut.RegisterCallback<MouseUpEvent>((a) =>
-            {
-                Debug.Log('a');
-            });
-
             #endregion
 
             Label label = new Label()
@@ -144,64 +139,7 @@ namespace XFramewrok.StoryKit
             m_ContentUI.AddToClassList("content");
 
             // 处理节点内容
-            var fields = GetFields(data.GetType());
-            foreach (var field in fields)
-            {
-                var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
-                if (attribute != null)
-                {
-                    if (attribute is TextFieldAttribute)
-                    {
-                        TextField textField = new TextField
-                        {
-                            label = field.Name,
-                            value = field.GetValue(data) as string,
-                        };
-                        textField.RegisterValueChangedCallback((v) => { field.SetValue(data, v.newValue); });
-                        textField.AddToClassList("item");
-                        m_ContentUI.Add(textField);
-                    }
-                    else if (attribute is TextureAttribute)
-                    {
-                        var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
-                        ObjectField imageFiled = new ObjectField
-                        {
-                            label = field.Name,
-                            objectType = typeof(Texture),
-                            value = tex,
-                        };
-                        imageFiled.AddToClassList("item");
-
-                        Image preview = new Image
-                        {
-                            image = tex,
-                            scaleMode = ScaleMode.StretchToFill
-                        };
-                        preview.AddToClassList("item");
-
-                        imageFiled.RegisterValueChangedCallback((v) =>
-                        {
-                            Texture texture = v.newValue as Texture;
-                            if (v != null)
-                            {
-                                string path = AssetDatabase.GetAssetPath(v.newValue);
-                                field.SetValue(data, path);
-
-                                float ratio = (float)texture.height / texture.width;
-
-                                preview.style.height = preview.layout.width * ratio;
-                            }
-                            else
-                            {
-                                field.SetValue(data, null);
-                            }
-                            preview.image = v.newValue as Texture;
-                        });
-                        m_ContentUI.Add(imageFiled);
-                        m_ContentUI.Add(preview);
-                    }
-                }
-            }
+            ConfigNodeContent();
 
             #endregion
 
@@ -250,6 +188,8 @@ namespace XFramewrok.StoryKit
 
         public void DrawConnectLine()
         {
+            Node waitRemoved = null;
+
             foreach (var item in m_NextNodes)
             {
                 Vector2 p1 = GetPos(this.connectPointOut);
@@ -266,6 +206,16 @@ namespace XFramewrok.StoryKit
                 );
 
                 GUI.changed = true;
+
+                if (Handles.Button((p1 + p2) * 0.5f, Quaternion.identity, 4, 8, Handles.CircleHandleCap))
+                {
+                    waitRemoved = item;
+                }
+            }
+
+            if (waitRemoved != null)
+            {
+                RemoveNextNode(waitRemoved);
             }
         }
 
@@ -293,6 +243,85 @@ namespace XFramewrok.StoryKit
             while (type != typeof(NodeData).BaseType);
 
             return result;
+        }
+
+        private void ConfigNodeContent()
+        {
+            var fields = GetFields(data.GetType());
+            object a = data;
+            ConfigNodeContent(fields, data);
+        }
+
+        private void ConfigNodeContent(IEnumerable<FieldInfo> fields, object target)
+        {
+            foreach (var field in fields)
+            {
+                var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
+                if (attribute != null)
+                {
+                    if (attribute is TextFieldAttribute)
+                    {
+                        TextField textField = new TextField
+                        {
+                            label = field.Name,
+                            value = field.GetValue(target) as string,
+                        };
+                        textField.RegisterValueChangedCallback((v) => 
+                        {
+                            field.SetValue(target, v.newValue);
+                        });
+                        textField.AddToClassList("item");
+                        m_ContentUI.Add(textField);
+                    }
+                    else if (attribute is TextureAttribute)
+                    {
+                        var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
+                        ObjectField imageFiled = new ObjectField
+                        {
+                            label = field.Name,
+                            objectType = typeof(Texture),
+                            value = tex,
+                        };
+                        imageFiled.AddToClassList("item");
+
+                        Image preview = new Image
+                        {
+                            image = tex,
+                            scaleMode = ScaleMode.StretchToFill
+                        };
+                        preview.AddToClassList("item");
+
+                        imageFiled.RegisterValueChangedCallback((v) =>
+                        {
+                            Texture texture = v.newValue as Texture;
+                            if (texture != null)
+                            {
+                                string path = AssetDatabase.GetAssetPath(v.newValue);
+                                field.SetValue(data, path);
+
+                                float ratio = (float)texture.height / texture.width;
+
+                                preview.style.height = preview.layout.width * ratio;
+                            }
+                            else
+                            {
+                                preview.style.height = 0;
+                                field.SetValue(data, null);
+                            }
+                            preview.image = texture;
+                        });
+                        m_ContentUI.Add(imageFiled);
+                        m_ContentUI.Add(preview);
+                    }
+                    else if(attribute is ClassFieldAttribute)
+                    {
+                        var classType = field.FieldType;
+                        var obj = field.GetValue(target);
+
+                        ConfigNodeContent(classType.GetFields(), obj);
+                    }
+                }
+            }
         }
     }
 }

@@ -290,6 +290,8 @@ namespace XFramewrok.StoryKit
         {
             string fileName = EditorUtility.SaveFilePanel("保存路径", Application.dataPath, "NewNodeDatas", "json");
 
+            if (string.IsNullOrEmpty(fileName)) return;
+
             List<SerializableNodeData> serializableNodeDatas = new List<SerializableNodeData>();
             foreach (var node in m_NodeList)
             {
@@ -320,6 +322,8 @@ namespace XFramewrok.StoryKit
         private void OpenAsset()
         {
             string fileName = EditorUtility.OpenFilePanel("打开路径", Application.dataPath, "json");
+
+            if (string.IsNullOrEmpty(fileName)) return;
 
             string json = System.IO.File.ReadAllText(fileName);
 
