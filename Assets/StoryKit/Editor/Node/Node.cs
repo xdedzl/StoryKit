@@ -248,12 +248,17 @@ namespace XFramewrok.StoryKit
         private void ConfigNodeContent()
         {
             var fields = GetFields(data.GetType());
-            object a = data;
             ConfigNodeContent(fields, data);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fields"></param>
+        /// <param name="target">如果是结构体，field.SetValue是会产生问题 在</param>
         private void ConfigNodeContent(IEnumerable<FieldInfo> fields, object target)
         {
+            bool isClass = target.GetType().IsClass;
             foreach (var field in fields)
             {
                 var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
@@ -268,7 +273,12 @@ namespace XFramewrok.StoryKit
                         };
                         textField.RegisterValueChangedCallback((v) => 
                         {
-                            field.SetValue(target, v.newValue);
+                            Debug.Log(target.GetHashCode());
+                            SetValue(field, target, v.newValue, isClass);
+                            Debug.Log(target.GetHashCode());
+
+                            Debug.Log(v.newValue);
+                            Debug.Log(field.GetValue(target));
                         });
                         textField.AddToClassList("item");
                         m_ContentUI.Add(textField);
@@ -297,7 +307,7 @@ namespace XFramewrok.StoryKit
                             if (texture != null)
                             {
                                 string path = AssetDatabase.GetAssetPath(v.newValue);
-                                field.SetValue(data, path);
+                                SetValue(field, data, path, isClass);
 
                                 float ratio = (float)texture.height / texture.width;
 
@@ -306,7 +316,7 @@ namespace XFramewrok.StoryKit
                             else
                             {
                                 preview.style.height = 0;
-                                field.SetValue(data, null);
+                                SetValue(field, data, null, isClass);
                             }
                             preview.image = texture;
                         });
@@ -317,10 +327,39 @@ namespace XFramewrok.StoryKit
                     {
                         var classType = field.FieldType;
                         var obj = field.GetValue(target);
+                        //var obj = GetValue(field, target, false);
 
-                        ConfigNodeContent(classType.GetFields(), obj);
+                        ConfigNodeContent(classType.GetFields(BindingFlags.Public | BindingFlags.Instance), obj);
                     }
                 }
+            }
+        }
+
+        private void SetValue(FieldInfo field, object target, object value, bool isClass)
+        {
+            if (isClass)
+            {
+                field.SetValue(target, value);
+            }
+            else
+            {
+                var a = (OptionInfo)target;
+                var r = __makeref(a);
+                //var r = TypedReference.MakeTypedReference(target, new FieldInfo[] { field });
+                field.SetValueDirect(r, value);
+            }
+        }
+
+        private object GetValue(FieldInfo field, object target, bool isClass)
+        {
+            if (isClass)
+            {
+                return field.GetValue(target);
+            }
+            else
+            {
+                var r = TypedReference.MakeTypedReference(target, new FieldInfo[] { field });
+                return field.GetValueDirect(r);
             }
         }
     }
