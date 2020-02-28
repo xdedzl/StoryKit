@@ -6,7 +6,6 @@ public class CGStoryData : StoryDataBase
     /// <summary>
     /// CG图集
     /// </summary>
-    [Texture]
     public string image;
     /// <summary>
     /// 内容

@@ -6,13 +6,11 @@ public class TabsData : StoryDataBase
     /// <summary>
     /// 标题
     /// </summary>
-    [TextField]
     public string title;
     /// <summary>
     /// 选项组
     /// </summary>
     public OptionInfo[] options;
-    [ClassField]
     public OptionInfo option;
 }
 
@@ -24,7 +22,6 @@ public struct OptionInfo
     /// <summary>
     /// 内容
     /// </summary>
-    [TextField]
     public string content;
     /// <summary>
     /// 跳转id

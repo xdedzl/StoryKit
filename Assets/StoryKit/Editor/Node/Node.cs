@@ -258,81 +258,81 @@ namespace XFramewrok.StoryKit
         /// <param name="target">如果是结构体，field.SetValue是会产生问题 在</param>
         private void ConfigNodeContent(IEnumerable<FieldInfo> fields, object target)
         {
-            bool isClass = target.GetType().IsClass;
-            foreach (var field in fields)
-            {
-                var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
-                if (attribute != null)
-                {
-                    if (attribute is TextFieldAttribute)
-                    {
-                        TextField textField = new TextField
-                        {
-                            label = field.Name,
-                            value = field.GetValue(target) as string,
-                        };
-                        textField.RegisterValueChangedCallback((v) => 
-                        {
-                            Debug.Log(target.GetHashCode());
-                            SetValue(field, target, v.newValue, isClass);
-                            Debug.Log(target.GetHashCode());
+            //bool isClass = target.GetType().IsClass;
+            //foreach (var field in fields)
+            //{
+            //    var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
+            //    if (attribute != null)
+            //    {
+            //        if (attribute is TextFieldAttribute)
+            //        {
+            //            TextField textField = new TextField
+            //            {
+            //                label = field.Name,
+            //                value = field.GetValue(target) as string,
+            //            };
+            //            textField.RegisterValueChangedCallback((v) => 
+            //            {
+            //                Debug.Log(target.GetHashCode());
+            //                SetValue(field, target, v.newValue, isClass);
+            //                Debug.Log(target.GetHashCode());
 
-                            Debug.Log(v.newValue);
-                            Debug.Log(field.GetValue(target));
-                        });
-                        textField.AddToClassList("item");
-                        m_ContentUI.Add(textField);
-                    }
-                    else if (attribute is TextureAttribute)
-                    {
-                        var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
-                        ObjectField imageFiled = new ObjectField
-                        {
-                            label = field.Name,
-                            objectType = typeof(Texture),
-                            value = tex,
-                        };
-                        imageFiled.AddToClassList("item");
+            //                Debug.Log(v.newValue);
+            //                Debug.Log(field.GetValue(target));
+            //            });
+            //            textField.AddToClassList("item");
+            //            m_ContentUI.Add(textField);
+            //        }
+            //        else if (attribute is TextureAttribute)
+            //        {
+            //            var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
+            //            ObjectField imageFiled = new ObjectField
+            //            {
+            //                label = field.Name,
+            //                objectType = typeof(Texture),
+            //                value = tex,
+            //            };
+            //            imageFiled.AddToClassList("item");
 
-                        Image preview = new Image
-                        {
-                            image = tex,
-                            scaleMode = ScaleMode.StretchToFill
-                        };
-                        preview.AddToClassList("item");
+            //            Image preview = new Image
+            //            {
+            //                image = tex,
+            //                scaleMode = ScaleMode.StretchToFill
+            //            };
+            //            preview.AddToClassList("item");
 
-                        imageFiled.RegisterValueChangedCallback((v) =>
-                        {
-                            Texture texture = v.newValue as Texture;
-                            if (texture != null)
-                            {
-                                string path = AssetDatabase.GetAssetPath(v.newValue);
-                                SetValue(field, data, path, isClass);
+            //            imageFiled.RegisterValueChangedCallback((v) =>
+            //            {
+            //                Texture texture = v.newValue as Texture;
+            //                if (texture != null)
+            //                {
+            //                    string path = AssetDatabase.GetAssetPath(v.newValue);
+            //                    SetValue(field, data, path, isClass);
 
-                                float ratio = (float)texture.height / texture.width;
+            //                    float ratio = (float)texture.height / texture.width;
 
-                                preview.style.height = preview.layout.width * ratio;
-                            }
-                            else
-                            {
-                                preview.style.height = 0;
-                                SetValue(field, data, null, isClass);
-                            }
-                            preview.image = texture;
-                        });
-                        m_ContentUI.Add(imageFiled);
-                        m_ContentUI.Add(preview);
-                    }
-                    else if(attribute is ClassFieldAttribute)
-                    {
-                        var classType = field.FieldType;
-                        var obj = field.GetValue(target);
-                        //var obj = GetValue(field, target, false);
+            //                    preview.style.height = preview.layout.width * ratio;
+            //                }
+            //                else
+            //                {
+            //                    preview.style.height = 0;
+            //                    SetValue(field, data, null, isClass);
+            //                }
+            //                preview.image = texture;
+            //            });
+            //            m_ContentUI.Add(imageFiled);
+            //            m_ContentUI.Add(preview);
+            //        }
+            //        else if(attribute is ClassFieldAttribute)
+            //        {
+            //            var classType = field.FieldType;
+            //            var obj = field.GetValue(target);
+            //            //var obj = GetValue(field, target, false);
 
-                        ConfigNodeContent(classType.GetFields(BindingFlags.Public | BindingFlags.Instance), obj);
-                    }
-                }
-            }
+            //            ConfigNodeContent(classType.GetFields(BindingFlags.Public | BindingFlags.Instance), obj);
+            //        }
+            //    }
+            //}
         }
 
         private void SetValue(FieldInfo field, object target, object value, bool isClass)
