@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.UIElements;
 
-namespace SFramework.UI
+namespace XFramework.UI
 {
     public abstract class InspectorElement : VisualElement
     {
@@ -19,7 +18,16 @@ namespace SFramework.UI
         private Inspector m_inspector;
 
         [SerializeField]
-        protected Text variableNameText;
+        public TextElement variableNameText { get; protected set; }
+
+        public InspectorElement()
+        {
+            variableNameText = new TextElement();
+            this.Add(variableNameText);
+
+            this.AddToClassList("inspector-element");
+            variableNameText.AddToClassList("label");
+        }
 
         protected object Value
         {
@@ -71,13 +79,6 @@ namespace SFramework.UI
         }
 
         /// <summary>
-        /// 是否支持某个类型
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public abstract bool SupportType(Type type);
-
-        /// <summary>
         /// 绑定UI
         /// </summary>
         /// <param name="parent">UI</param>
@@ -112,7 +113,7 @@ namespace SFramework.UI
                     BindTo(field.FieldType, variableName, () => field.GetValue(parent.Value), (value) =>
                     {
                         field.SetValue(parent.Value, value);
-                        parent.Value = parent.Value;
+                        parent.Value = parent.Value;         // 这一步是为了将struct的值不断向上一级传递
                     });
             }
             else if (member is PropertyInfo property)

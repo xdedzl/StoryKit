@@ -1,11 +1,11 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEditor.UIElements;
-using System.Collections.Generic;
-using System;
 
-namespace XFramewrok.StoryKit
+namespace XFramework.StoryKit
 {
     public class StoryKitWindow : EditorWindow
     {
@@ -16,8 +16,6 @@ namespace XFramewrok.StoryKit
             window.minSize = new Vector2(450, 514);
             window.titleContent = new GUIContent("StoryKit");
         }
-
-        private StyleSheet nodeStyle;
 
         private Vector2 offset;
         private Vector2 drag;
@@ -37,10 +35,12 @@ namespace XFramewrok.StoryKit
         {
             m_NodeList = new List<Node>();
 
-            nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss"); 
+            var nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss");
+            var inspectorStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/InspectorElement.uss");
 
             var root = rootVisualElement;
-            root.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/StoryKitWindow.uss"));
+            root.styleSheets.Add(nodeStyle);
+            root.styleSheets.Add(inspectorStyle);
 
             Toolbar toolbar = new Toolbar();
             ToolbarButton openBtn = new ToolbarButton();
@@ -106,7 +106,7 @@ namespace XFramewrok.StoryKit
                     {
                         activeDrag = true;
 
-                        if(ConnectPoint.StartPoint != null)
+                        if (ConnectPoint.StartPoint != null)
                         {
                             ShowCreateNodeMenu(e.mousePosition, "", (node) =>
                             {
@@ -131,7 +131,7 @@ namespace XFramewrok.StoryKit
                         ProcessContextMenu(e.mousePosition);
                     }
 
-                    if(e.button == 2)
+                    if (e.button == 2)
                     {
                         ConnectPoint.ClearLine();
                     }
@@ -198,7 +198,6 @@ namespace XFramewrok.StoryKit
         private void AddNode(Node node)
         {
             m_NodeList.Add(node);
-            node.styleSheets.Add(nodeStyle);
             m_NodeRoot.Add(node);
         }
 
@@ -298,7 +297,7 @@ namespace XFramewrok.StoryKit
                 var nextNodes = node.GetNextNodes();
                 node.data.nextNodes?.Clear();
 
-                if(nextNodes.Length > 0)
+                if (nextNodes.Length > 0)
                     node.data.nextNodes = node.data.nextNodes ?? new List<int>();
 
                 foreach (var item in nextNodes)

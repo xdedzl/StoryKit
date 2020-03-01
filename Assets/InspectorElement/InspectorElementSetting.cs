@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SFramework.UI
+namespace XFramework.UI
 {
     [CreateAssetMenu(fileName = "UIItem Settings", menuName = "SFramework/UIItem/Settings", order = 111)]
     public class InspectorElementSetting : ScriptableObject

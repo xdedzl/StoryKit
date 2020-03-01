@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
+using XFramework.UI;
 
-namespace XFramewrok.StoryKit
+namespace XFramework.StoryKit
 {
     public class Node : VisualElement
     {
         public NodeData data { get; private set; }
 
         private bool isMove;
-        private VisualElement m_ContentUI;
+        private Inspector m_ContentUI;
         private ConnectPoint connectPointIn;
         private ConnectPoint connectPointOut;
 
@@ -135,11 +133,9 @@ namespace XFramewrok.StoryKit
 
             #region 数据内容
 
-            m_ContentUI = new VisualElement();
+            m_ContentUI = new Inspector();
             m_ContentUI.AddToClassList("content");
-
-            // 处理节点内容
-            ConfigNodeContent();
+            m_ContentUI.Bind(data);
 
             #endregion
 
@@ -222,145 +218,6 @@ namespace XFramewrok.StoryKit
         private Vector2 GetPos(VisualElement visualElement)
         {
             return visualElement.worldBound.position;
-        }
-
-        /// <summary>
-        /// 对获得FieldInfos排序
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private List<FieldInfo> GetFields(Type type)
-        {
-            List<FieldInfo> result = new List<FieldInfo>();
-
-            do
-            {
-                var temp = new List<FieldInfo>(type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-                temp.AddRange(result);
-                result = temp;
-                type = type.BaseType;
-            }
-            while (type != typeof(NodeData).BaseType);
-
-            return result;
-        }
-
-        private void ConfigNodeContent()
-        {
-            var fields = GetFields(data.GetType());
-            ConfigNodeContent(fields, data);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="fields"></param>
-        /// <param name="target">如果是结构体，field.SetValue是会产生问题 在</param>
-        private void ConfigNodeContent(IEnumerable<FieldInfo> fields, object target)
-        {
-            //bool isClass = target.GetType().IsClass;
-            //foreach (var field in fields)
-            //{
-            //    var attribute = System.Attribute.GetCustomAttribute(field, typeof(NodeElemnetAttribute));
-            //    if (attribute != null)
-            //    {
-            //        if (attribute is TextFieldAttribute)
-            //        {
-            //            TextField textField = new TextField
-            //            {
-            //                label = field.Name,
-            //                value = field.GetValue(target) as string,
-            //            };
-            //            textField.RegisterValueChangedCallback((v) => 
-            //            {
-            //                Debug.Log(target.GetHashCode());
-            //                SetValue(field, target, v.newValue, isClass);
-            //                Debug.Log(target.GetHashCode());
-
-            //                Debug.Log(v.newValue);
-            //                Debug.Log(field.GetValue(target));
-            //            });
-            //            textField.AddToClassList("item");
-            //            m_ContentUI.Add(textField);
-            //        }
-            //        else if (attribute is TextureAttribute)
-            //        {
-            //            var tex = AssetDatabase.LoadAssetAtPath<Texture>(field.GetValue(data) as string);
-            //            ObjectField imageFiled = new ObjectField
-            //            {
-            //                label = field.Name,
-            //                objectType = typeof(Texture),
-            //                value = tex,
-            //            };
-            //            imageFiled.AddToClassList("item");
-
-            //            Image preview = new Image
-            //            {
-            //                image = tex,
-            //                scaleMode = ScaleMode.StretchToFill
-            //            };
-            //            preview.AddToClassList("item");
-
-            //            imageFiled.RegisterValueChangedCallback((v) =>
-            //            {
-            //                Texture texture = v.newValue as Texture;
-            //                if (texture != null)
-            //                {
-            //                    string path = AssetDatabase.GetAssetPath(v.newValue);
-            //                    SetValue(field, data, path, isClass);
-
-            //                    float ratio = (float)texture.height / texture.width;
-
-            //                    preview.style.height = preview.layout.width * ratio;
-            //                }
-            //                else
-            //                {
-            //                    preview.style.height = 0;
-            //                    SetValue(field, data, null, isClass);
-            //                }
-            //                preview.image = texture;
-            //            });
-            //            m_ContentUI.Add(imageFiled);
-            //            m_ContentUI.Add(preview);
-            //        }
-            //        else if(attribute is ClassFieldAttribute)
-            //        {
-            //            var classType = field.FieldType;
-            //            var obj = field.GetValue(target);
-            //            //var obj = GetValue(field, target, false);
-
-            //            ConfigNodeContent(classType.GetFields(BindingFlags.Public | BindingFlags.Instance), obj);
-            //        }
-            //    }
-            //}
-        }
-
-        private void SetValue(FieldInfo field, object target, object value, bool isClass)
-        {
-            if (isClass)
-            {
-                field.SetValue(target, value);
-            }
-            else
-            {
-                var a = (OptionInfo)target;
-                var r = __makeref(a);
-                //var r = TypedReference.MakeTypedReference(target, new FieldInfo[] { field });
-                field.SetValueDirect(r, value);
-            }
-        }
-
-        private object GetValue(FieldInfo field, object target, bool isClass)
-        {
-            if (isClass)
-            {
-                return field.GetValue(target);
-            }
-            else
-            {
-                var r = TypedReference.MakeTypedReference(target, new FieldInfo[] { field });
-                return field.GetValueDirect(r);
-            }
         }
     }
 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace XFramewrok.StoryKit
+namespace XFramework.StoryKit
 {
     public enum Point
     {
