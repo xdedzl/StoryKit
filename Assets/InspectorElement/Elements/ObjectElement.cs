@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 namespace XFramework.UI
 {
@@ -10,14 +8,40 @@ namespace XFramework.UI
     {
         protected override void CreateElements()
         {
-            foreach (MemberInfo member in GetFields(BoundVariableType))
+            base.CreateElements();
+
+            // 共有变量且未添加ItemIngore特性
+            foreach (MemberInfo member in GetMembers(BoundVariableType, BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetField | BindingFlags.GetProperty))
             {
-                var a = CreateItemForMember(member);
-                if (a != null)
+                if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
                 {
-                    this.Add(a);
-                    a.BindTo(this, member);
-                    a.Refresh();
+                    if (Attribute.IsDefined(member, typeof(ElementIngoreAttribute)))
+                        continue;
+
+                    var nameAttribute = member.GetCustomAttribute<ElementPropertyAttribute>();
+                    string proertyName = nameAttribute != null && !string.IsNullOrEmpty(nameAttribute.propertyName) ? nameAttribute.propertyName : member.Name;
+                    var element = CreateItemForMember(member, Depth + 1);
+                    element.BindTo(this, member, proertyName);
+                    element.Refresh();
+                    this.Add(element);
+                }
+            }
+
+            // 非公有变量添加ItemProperty特性
+            foreach (MemberInfo member in GetMembers(BoundVariableType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.GetProperty))
+            {
+                if (member.MemberType == MemberTypes.Field || member.MemberType == MemberTypes.Property)
+                {
+                    var nameAttribute = member.GetCustomAttribute<ElementPropertyAttribute>();
+
+                    if (nameAttribute != null)
+                    {
+                        string proertyName = !string.IsNullOrEmpty(nameAttribute.propertyName) ? nameAttribute.propertyName : member.Name;
+                        var element = CreateItemForMember(member, Depth + 1);
+                        element.BindTo(this, member, proertyName);
+                        element.Refresh();
+                        this.Add(element);
+                    }
                 }
             }
         }
@@ -28,29 +52,23 @@ namespace XFramework.UI
         /// <param name="member"></param>
         /// <param name="parentElement"></param>
         /// <returns></returns>
-        private InspectorElement CreateItemForMember(MemberInfo member)
+        private InspectorElement CreateItemForMember(MemberInfo member, int depth)
         {
-            if(Attribute.IsDefined(member, typeof(ElementIngoreAttribute)))
+            if (Attribute.IsDefined(member, typeof(ElementIngoreAttribute)))
             {
                 return null;
             }
 
-            Type variableType = member is FieldInfo ? ((FieldInfo)member).FieldType : ((PropertyInfo)member).PropertyType;
-
-            InspectorElementAttribute attribute = member.GetCustomAttribute<InspectorElementAttribute>();
+            CustomerElementAttribute attribute = member.GetCustomAttribute<CustomerElementAttribute>();
 
             if (attribute != null && attribute.type != null)
             {
-                if (!attribute.type.IsSubclassOf(typeof(InspectorElement)))
-                {
-                    throw new Exception($"{member.Name}设置的{attribute.type.Name}不派生自UIItem");
-                }
-
-                return Inspector.CreateDrawerForType(attribute.type);
+                return Inspector.CreateDrawerForType(attribute.type, depth);
             }
             else
             {
-                return Inspector.CreateDrawerForMemberType(variableType);
+                Type variableType = member is FieldInfo ? ((FieldInfo)member).FieldType : ((PropertyInfo)member).PropertyType;
+                return Inspector.CreateDrawerForMemberType(variableType, depth);
             }
         }
 
@@ -59,13 +77,13 @@ namespace XFramework.UI
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        private List<FieldInfo> GetFields(Type type)
+        private List<MemberInfo> GetMembers(Type type, BindingFlags bindingFlags)
         {
-            List<FieldInfo> result = new List<FieldInfo>();
+            List<MemberInfo> result = new List<MemberInfo>();
 
             do
             {
-                var temp = new List<FieldInfo>(type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                var temp = new List<MemberInfo>(type.GetMembers(bindingFlags | BindingFlags.DeclaredOnly));
                 temp.AddRange(result);
                 result = temp;
                 type = type.BaseType;

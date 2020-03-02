@@ -2,32 +2,46 @@
 
 namespace XFramework.UI
 {
+    /// <summary>
+    /// 定义自定义Element类型
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
-    public class InspectorElementAttribute : Attribute
+    public class CustomerElementAttribute : Attribute
     {
-        public string name;
         public Type type;
-        public InspectorElementAttribute(string name = null, Type type = null)
+
+        public CustomerElementAttribute(Type type)
         {
             if (type != null && !type.IsSubclassOf(typeof(InspectorElement)))
             {
                 throw new Exception($"参数type必须为{typeof(InspectorElement).Name}的派生类   type{type.Name}");
             }
-            this.name = name;
             this.type = type;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class ElementPriorityAttribute : Attribute
+    /// <summary>
+    /// 定义变量在UI上的显示名称
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+    public class ElementPropertyAttribute : Attribute
     {
-        public int priority;
-        public ElementPriorityAttribute(int priority)
+        public string propertyName;
+        public ElementPropertyAttribute(string propertyName)
         {
-            this.priority = priority;
+            this.propertyName = propertyName;
         }
     }
 
+    /// <summary>
+    /// 忽略该变量
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public class ElementIngoreAttribute : Attribute { }
+
+    /// <summary>
+    /// 定义该Element型支持的类型
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class DefaultSportTypesAttribute : Attribute
     {
@@ -38,6 +52,9 @@ namespace XFramework.UI
         }
     }
 
+    /// <summary>
+    /// 定义该Element型支持的类型
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class SupportHelperAttribute : Attribute
     {
@@ -47,9 +64,6 @@ namespace XFramework.UI
             this.support = Activator.CreateInstance(supportType) as ISupport;
         }
     }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class ElementIngoreAttribute : Attribute { }
 
     public interface ISupport
     {

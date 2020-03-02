@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace XFramework.StoryKit
 {
@@ -31,26 +29,9 @@ namespace XFramework.StoryKit
 
         #endregion
 
-        private Dictionary<int, NodeData> m_NodeDataDic;
-
         private NodeManager()
         {
             m_IdPools = new List<int>();
-
-            m_NodeDataDic = new Dictionary<int, NodeData>(); 
-        }
-
-        private NodeData CreateNodeInternal()
-        {
-            NodeData nodeData = new NodeData
-            {
-                id = instance.Id,
-                name = "新节点",
-            };
-
-            m_NodeDataDic.Add(nodeData.id, nodeData);
-
-            return nodeData;
         }
 
         private NodeData CreateNodeInternal(Type type)
@@ -58,10 +39,8 @@ namespace XFramework.StoryKit
             if (type.IsSubclassOf(typeof(NodeData)))
             {
                 NodeData nodeData = Activator.CreateInstance(type) as NodeData;
-                nodeData.id = instance.Id;
+                //nodeData.id = instance.Id;
                 nodeData.name = "新节点";
-
-                m_NodeDataDic.Add(nodeData.id, nodeData);
 
                 return nodeData;
             }
@@ -71,49 +50,11 @@ namespace XFramework.StoryKit
             }
         }
 
-
         #region Static 调用
-
-        /// <summary>
-        /// 创建一个节点
-        /// </summary>
-        /// <returns></returns>
-        public static NodeData CreateNodeData()
-        {
-            return instance.CreateNodeInternal();
-        }
 
         public static NodeData CreateNodeData(Type type)
         {
             return instance.CreateNodeInternal(type);
-        }
-
-        /// <summary>
-        /// 连接节点
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="nextNode"></param>
-        public static void Connect(NodeData node, NodeData nextNode)
-        {
-            if (node.nextNodes == null)
-            {
-                node.nextNodes = new List<int>();
-            }
-
-            node.nextNodes.Add(nextNode.id);
-        }
-
-        /// <summary>
-        /// 接初节点连接
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="nextNode"></param>
-        public static void Disconnect(NodeData node, NodeData nextNode)
-        {
-            if (node.nextNodes == null || !node.nextNodes.Remove(nextNode.id))
-            {
-                throw new System.Exception("两个节点没有连接");
-            }
         }
 
         #endregion

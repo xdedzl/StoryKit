@@ -15,9 +15,9 @@ namespace XFramework.StoryKit
         public static ConnectPoint StartPoint { get; private set; }
 
         public Point point;
-        public Node node;
+        public NodeBase node;
 
-        public ConnectPoint(Node node, Point point)
+        public ConnectPoint(NodeBase node, Point point)
         {
             this.node = node;
             this.point = point;

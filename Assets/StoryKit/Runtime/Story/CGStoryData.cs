@@ -4,12 +4,12 @@ using XFramework.UI;
 /// CG剧情
 /// </summary>
 [System.Serializable]
-public class CGStoryData : NodeData
+public class CGStoryData : StoryDataBase
 {
     /// <summary>
     /// CG图集
     /// </summary>
-    [InspectorElement(type =typeof(TexturePathElement))]
+    [CustomerElement(typeof(TexturePathElement))]
     public string image;
     /// <summary>
     /// 内容

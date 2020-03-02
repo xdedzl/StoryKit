@@ -57,7 +57,7 @@ namespace XFramework.UI
                 return;
             }
 
-            InspectorElement uiItem = CreateDrawerForMemberType(obj.GetType());
+            InspectorElement uiItem = CreateDrawerForMemberType(obj.GetType(), -1);
             this.Add(uiItem); 
             if (uiItem != null)
             {
@@ -72,7 +72,7 @@ namespace XFramework.UI
         /// <summary>
         /// 通过成员变量类型获取UIItem
         /// </summary>
-        public InspectorElement CreateDrawerForMemberType(Type memberType, int depth = 0)
+        public InspectorElement CreateDrawerForMemberType(Type memberType, int depth)
         {
             if (m_DefaultTypeToDrawer.TryGetValue(memberType, out Type elementType))
             {
@@ -98,10 +98,11 @@ namespace XFramework.UI
         /// <param name="elementType"></param>
         /// <param name="drawerParent"></param>
         /// <returns></returns>
-        public InspectorElement CreateDrawerForType(Type elementType, int depth = 0)
+        public InspectorElement CreateDrawerForType(Type elementType, int depth)
         {
             InspectorElement element = Activator.CreateInstance(elementType) as InspectorElement;
             element.Inspector = this;
+            element.Depth = depth;
             return element;
         }
 

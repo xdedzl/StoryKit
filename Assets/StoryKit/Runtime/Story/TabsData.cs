@@ -11,7 +11,6 @@ public class TabsData : StoryDataBase
     /// 选项组
     /// </summary>
     public OptionInfo[] options;
-    public OptionInfo option;
 }
 
 /// <summary>

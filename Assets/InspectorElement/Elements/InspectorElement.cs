@@ -16,6 +16,7 @@ namespace XFramework.UI
         private object m_value;
         private Type m_boundVariableType;
         private Inspector m_inspector;
+        private int m_depth;
 
         [SerializeField]
         public TextElement variableNameText { get; protected set; }
@@ -62,6 +63,20 @@ namespace XFramework.UI
             }
         }
 
+        public int Depth
+        {
+            get
+            {
+                return m_depth;
+            }
+            set
+            {
+                m_depth = value;
+                if (variableNameText != null)
+                    variableNameText.transform.position = new Vector2(10 * Depth, 0f);
+            }
+        }
+
         protected string Name
         {
             get
@@ -84,20 +99,9 @@ namespace XFramework.UI
         /// <param name="parent">UI</param>
         /// <param name="member">成员</param>
         /// <param name="variableName">变量名称</param>
-        public void BindTo(InspectorElement parent, MemberInfo member)
+        public void BindTo(InspectorElement parent, MemberInfo member, string proertyName)
         {
-            var attribute = member.GetCustomAttribute<InspectorElementAttribute>();
-            string variableName = null;
-
-            if (attribute != null)
-            {
-                variableName = attribute.name;
-            }
-
-            if (string.IsNullOrEmpty(variableName))
-            {
-                variableName = member.Name;
-            }
+            string variableName = proertyName;
 
             if (member is FieldInfo field)
             {

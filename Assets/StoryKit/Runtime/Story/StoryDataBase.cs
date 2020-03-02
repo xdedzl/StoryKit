@@ -1,9 +1,13 @@
 ﻿using Newtonsoft.Json;
+using XFramework.UI;
 /// <summary>
 /// 剧情数据基类
 /// </summary>
-public class StoryDataBase : NodeData
+public abstract class StoryDataBase
 {
+    [ElementIngore]
+    public int id;
+    public string name;
     /// <summary>
     /// 前置条件id
     /// </summary>
@@ -17,5 +21,6 @@ public class StoryDataBase : NodeData
     /// <summary>
     /// 跳转id
     /// </summary>
-    public int jumpId;
+    [ElementIngore]
+    public int[] jumpId;
 }

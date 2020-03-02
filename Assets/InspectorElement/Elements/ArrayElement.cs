@@ -28,7 +28,7 @@ namespace XFramework.UI
                 Array array = (Array)Value;
                 for (int i = 0; i < array.Length; i++)
                 {
-                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType);
+                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType, Depth + 1);
                     if (elementDrawer == null)
                         break;
 
@@ -40,7 +40,6 @@ namespace XFramework.UI
                         Value = _array;
                     });
 
-                    elementDrawer.variableNameText.transform.position += new Vector3(10, 0, 0);
                     this.Add(elementDrawer);
                 }
             }
@@ -49,7 +48,7 @@ namespace XFramework.UI
                 IList list = (IList)Value;
                 for (int i = 0; i < list.Count; i++)
                 {
-                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType);
+                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType, Depth + 1);
                     if (elementDrawer == null)
                         break;
 
