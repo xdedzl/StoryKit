@@ -9,6 +9,7 @@ namespace XFramework.UI
         public override void Refresh()
         {
             base.Refresh();
+            ClearElements();
             CreateElements();
         }
 

@@ -10,14 +10,14 @@ namespace XFramework.StoryKit
         Out
     }
 
-    public class ConnectPoint : VisualElement
+    public class ConnectPoint<T> : VisualElement
     {
-        public static ConnectPoint StartPoint { get; private set; }
+        public static ConnectPoint<T> StartPoint { get; private set; }
 
         public Point point;
-        public NodeBase node;
+        public Node<T> node;
 
-        public ConnectPoint(NodeBase node, Point point)
+        public ConnectPoint(Node<T> node, Point point)
         {
             this.node = node;
             this.point = point;

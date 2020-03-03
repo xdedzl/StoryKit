@@ -7,6 +7,9 @@
 .integer-element{
     flex-direction: row;
 }
+.decimal-element{
+    flex-direction: row;
+}
 .string-element{
     flex-direction: row;
 }

@@ -7,7 +7,11 @@ using UnityEngine.UIElements;
 
 namespace XFramework.StoryKit
 {
-    public class NodeKitWindow<T> : EditorWindow
+    /// <summary>
+    /// 节点窗口基类
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class NodeKitWindow<T> : EditorWindow
     {
         private Vector2 offset;
         private Vector2 drag;
@@ -15,7 +19,7 @@ namespace XFramework.StoryKit
 
         private VisualElement m_NodeRoot;
 
-        private List<NodeBase> m_NodeList;
+        private List<Node<T>> m_NodeList;
 
         [ContextMenu("dsad")]
         private void TTT()
@@ -25,7 +29,7 @@ namespace XFramework.StoryKit
 
         private void OnEnable()
         {
-            m_NodeList = new List<NodeBase>();
+            m_NodeList = new List<Node<T>>();
 
             var nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss");
             var inspectorStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/InspectorElement.uss");
@@ -53,17 +57,9 @@ namespace XFramework.StoryKit
                 ProcessEvents(Event.current);
             });
 
-            NodeBase.onNodeDelete += (n) =>
+            Node<T>.onNodeDelete += (n) =>
             {
                 m_NodeList.Remove(n);
-            };
-            NodeBase.onNextNodeAdd += (node, nextNode) =>
-            {
-                AddNode(nextNode);
-            };
-            NodeBase.onPrevNodeAdd += (node, prevNode) =>
-            {
-                AddNode(prevNode);
             };
 
             IMGUIContainer drawLine = new IMGUIContainer(() =>
@@ -98,34 +94,34 @@ namespace XFramework.StoryKit
                     {
                         activeDrag = true;
 
-                        if (ConnectPoint.StartPoint != null)
+                        if (ConnectPoint<T>.StartPoint != null)
                         {
                             ShowCreateNodeMenu(e.mousePosition, "", (node) =>
                             {
-                                if (ConnectPoint.StartPoint.point == Point.In)
+                                if (ConnectPoint<T>.StartPoint.point == Point.In)
                                 {
-                                    node.AddNextNode(ConnectPoint.StartPoint.node);
+                                    node.AddNextNode(ConnectPoint<T>.StartPoint.node);
                                 }
                                 else
                                 {
-                                    ConnectPoint.StartPoint.node.AddNextNode(node);
+                                    ConnectPoint<T>.StartPoint.node.AddNextNode(node);
                                 }
 
-                                ConnectPoint.ClearLine();
+                                ConnectPoint<T>.ClearLine();
                             });
                         }
                     }
 
                     if (e.button == 1)
                     {
-                        ConnectPoint.ClearLine();
+                        ConnectPoint<T>.ClearLine();
 
-                        ProcessContextMenu(e.mousePosition);
+                        ShowCreateNodeMenu(e.mousePosition, "Add Node");
                     }
 
                     if (e.button == 2)
                     {
-                        ConnectPoint.ClearLine();
+                        ConnectPoint<T>.ClearLine();
                     }
                     break;
                 case EventType.MouseUp:
@@ -145,23 +141,12 @@ namespace XFramework.StoryKit
         }
 
         /// <summary>
-        /// 菜单
-        /// </summary>
-        /// <param name="mousePosition"></param>
-        private void ProcessContextMenu(Vector2 mousePosition)
-        {
-            ShowCreateNodeMenu(mousePosition, "Add Node");
-        }
-
-        private int id = 10000;
-
-        /// <summary>
         /// 根据类型创建节点
         /// </summary>
         /// <param name="type"></param>
         /// <param name="pos"></param>
         /// <returns></returns>
-        private NodeBase CreateNode(Type type, Vector2 pos)
+        protected Node<T> CreateNode(Type type, Vector2 pos)
         {
             var data = CreateData(type);
             return CreateNode(data, pos);
@@ -171,34 +156,31 @@ namespace XFramework.StoryKit
         /// 创建一个节点
         /// </summary>
         /// <param name="pos"></param>
-        private NodeBase CreateNode(T nodeData, Vector2 pos)
+        protected Node<T> CreateNode(T nodeData, Vector2 pos)
         {
-            NodeBase node = new Node<T>(nodeData)
+            Node<T> node = new Node<T>(nodeData)
             {
                 transform =
                 {
                     position = pos,
                 }
             };
-            AddNode(node);
+            node.NodeWindow = this;
+            m_NodeList.Add(node);
+            m_NodeRoot.Add(node);
             return node;
         }
 
+        /// <summary>
+        /// 根据类型创建一条数据
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private T CreateData(Type type)
         {
             T data = (T)Activator.CreateInstance(type);
             OnDataInstantiat(data);
             return data;
-        }
-
-        /// <summary>
-        /// 添加一个节点
-        /// </summary>
-        /// <param name="node"></param>
-        private void AddNode(NodeBase node)
-        {
-            m_NodeList.Add(node);
-            m_NodeRoot.Add(node);
         }
 
         /// <summary>
@@ -265,48 +247,49 @@ namespace XFramework.StoryKit
         /// <param name="postion">节点位置</param>
         /// <param name="path">菜单路径</param>
         /// <param name="callback">创建完成回调</param>
-        private void ShowCreateNodeMenu(Vector2 postion, string path = "", Action<NodeBase> callback = null)
+        private void ShowCreateNodeMenu(Vector2 position, string path = "", Action<Node<T>> callback = null)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+            AddCreateNodeMenu(genericMenu, position, path, callback);
+            genericMenu.ShowAsContext();
+        }
+
+        /// <summary>
+        /// 给菜单添加创建节点的按钮
+        /// </summary>
+        public void AddCreateNodeMenu(GenericMenu genericMenu, Vector2 position, string path = "", Action<Node<T>> callback = null)
         {
             path = string.IsNullOrEmpty(path) ? "" : path + "/";
-
-            GenericMenu genericMenu = new GenericMenu();
 
             foreach (var item in Utility.GetSonTypes(typeof(StoryDataBase)))
             {
                 genericMenu.AddItem(new GUIContent($"{path}{item.Name}"), false, () =>
                 {
-                    NodeBase node = CreateNode(item, postion);
+                    Node<T> node = CreateNode(item, position);
                     callback?.Invoke(node);
                 });
             }
-
-            genericMenu.ShowAsContext();
         }
 
         #region 数据
 
+        /// <summary>
+        /// 保存数据（需自行实现连接信息的转化）
+        /// </summary>
         private void SaveAsset()
         {
             string fileName = EditorUtility.SaveFilePanel("保存路径", Application.dataPath, "NewNodeDatas", "json");
 
             if (string.IsNullOrEmpty(fileName)) return;
 
-            List<SerializableNodeData> serializableNodeDatas = new List<SerializableNodeData>();
+            var serializableNodeDatas = new List<SerializableNodeData<T>>();
             foreach (var node in m_NodeList)
             {
-                var nextNodes = node.GetNextNodes();
-                var data = node.Data as StoryDataBase;
-                data.jumpId = new int[nextNodes.Length];
-                
-                for (int i = 0; i < nextNodes.Length; i++)
-                {
-                    data.jumpId[0] = (nextNodes[i].Data as StoryDataBase).id;
-                }
-
-                serializableNodeDatas.Add(new SerializableNodeData
+                OnSave(node);
+                serializableNodeDatas.Add(new SerializableNodeData<T>
                 {
                     postion = node.transform.position,
-                    data = node.Data as StoryDataBase
+                    data = node.data
                 });
             }
 
@@ -316,6 +299,9 @@ namespace XFramework.StoryKit
             Debug.Log("Save successfully");
         }
 
+        /// <summary>
+        /// 打开数据（需自行实现连接信息的转化）
+        /// </summary>
         private void OpenAsset()
         {
             string fileName = EditorUtility.OpenFilePanel("打开路径", Application.dataPath, "json");
@@ -324,46 +310,28 @@ namespace XFramework.StoryKit
 
             string json = System.IO.File.ReadAllText(fileName);
 
-            var datas = Newtonsoft.Json.JsonConvert.DeserializeObject<SerializableNodeData[]>(json);
+            var datas = Newtonsoft.Json.JsonConvert.DeserializeObject<SerializableNodeData<T>[]>(json);
 
-            Dictionary<int, NodeBase> dataDic = new Dictionary<int, NodeBase>();
             foreach (var item in datas)
             {
-                //NodeBase node = CreateNode((T)item.data, item.postion);
-                //dataDic.Add(item.data.id, node);
+                Node<T> node = CreateNode(item.data, item.postion);
             }
 
-            foreach (var item in m_NodeList)
-            {
-                var data = item.Data as StoryDataBase;
-                if (data.jumpId != null)
-                {
-                    foreach (var id in data.jumpId)
-                    {
-                        item.AddNextNode(dataDic[id]);
-                    }
-                }
-            }
+            OnOpen(m_NodeList.ToArray());
         }
 
         #endregion
 
-        #region
+        #region 自定义
 
         protected virtual void OnDataInstantiat(T data)
         {
 
         }
 
-        protected virtual void OnSave(Node<T> node)
-        {
+        protected virtual void OnSave(Node<T> node) { }
 
-        }
-
-        protected virtual void OnOpen(Node<T> node)
-        {
-
-        }
+        protected virtual void OnOpen(Node<T>[] nodeDatas) { }
 
         #endregion
     }

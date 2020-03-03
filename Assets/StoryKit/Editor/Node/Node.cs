@@ -6,24 +6,25 @@ using XFramework.UI;
 
 namespace XFramework.StoryKit
 {
-    public abstract class NodeBase : VisualElement
+    public class Node<T> : VisualElement
     {
         private bool isMove;
-        private ConnectPoint connectPointIn;
-        private ConnectPoint connectPointOut;
+        private ConnectPoint<T> connectPointIn;
+        private ConnectPoint<T> connectPointOut;
         protected Inspector m_ContentUI;
+        private List<Node<T>> m_NextNodes;
+        private List<Node<T>> m_PrevNodes;
 
-        private List<NodeBase> m_NextNodes;
-        private List<NodeBase> m_PrevNodes;
+        public static event System.Action<Node<T>> onNodeDelete;
 
-        public static event System.Action<NodeBase> onNodeDelete;
-        public static event System.Action<NodeBase, NodeBase> onNextNodeAdd;
-        public static event System.Action<NodeBase, NodeBase> onPrevNodeAdd;
+        public NodeKitWindow<T> NodeWindow { get; set; }
 
-        public NodeBase()
+        public T data { get; private set; }
+
+        public Node()
         {
-            m_NextNodes = new List<NodeBase>();
-            m_PrevNodes = new List<NodeBase>();
+            m_NextNodes = new List<Node<T>>();
+            m_PrevNodes = new List<Node<T>>();
             this.RegisterCallback<PointerDownEvent>((a) =>
             {
                 this.BringToFront();
@@ -33,10 +34,10 @@ namespace XFramework.StoryKit
 
             #region 连接点
 
-            connectPointIn = new ConnectPoint(this, Point.In);
+            connectPointIn = new ConnectPoint<T>(this, Point.In);
             connectPointIn.AddToClassList("connectPoint");
             connectPointIn.RegisterCallback<PointerDownEvent>((a) => { a.StopPropagation(); });
-            connectPointOut = new ConnectPoint(this, Point.Out);
+            connectPointOut = new ConnectPoint<T>(this, Point.Out);
             connectPointOut.AddToClassList("connectPoint");
             connectPointOut.RegisterCallback<PointerDownEvent>((a) => { a.StopPropagation(); });
 
@@ -90,37 +91,13 @@ namespace XFramework.StoryKit
                 {
                     GenericMenu genericMenu = new GenericMenu();
                     genericMenu.AddItem(new GUIContent("Delete"), false, Delete);
-                    genericMenu.AddItem(new GUIContent("Add Next Node"), false, () =>
+                    NodeWindow.AddCreateNodeMenu(genericMenu, this.transform.position + new Vector3(150, 60, 0), "Add Next Node", (node) =>
                     {
-                        //NodeData nextData = NodeManager.CreateNodeData();
-
-                        //Node nextNode = new Node(nextData)
-                        //{
-                        //    transform =
-                        //    {
-                        //        position = this.transform.position + new Vector3(150,60,0),
-                        //    },
-                        //};
-
-                        //AddNextNode(nextNode);
-
-                        //onNextNodeAdd?.Invoke(this, nextNode);
+                        AddNextNode(node);
                     });
-                    genericMenu.AddItem(new GUIContent("Add Prev Node"), false, () =>
+                    NodeWindow.AddCreateNodeMenu(genericMenu, this.transform.position - new Vector3(20, 20, 0), "Add Prev Node", (node) =>
                     {
-                        //NodeData prevData = NodeManager.CreateNodeData();
-
-                        //Node prevNode = new Node(prevData)
-                        //{
-                        //    transform =
-                        //    {
-                        //        position = this.transform.position - new Vector3(20,20,0),
-                        //    },
-                        //};
-
-                        //prevNode.AddNextNode(this);
-
-                        //onPrevNodeAdd?.Invoke(this, prevNode);
+                        node.AddNextNode(this);
                     });
                     genericMenu.ShowAsContext();
                 }
@@ -131,15 +108,28 @@ namespace XFramework.StoryKit
             Add(title);
         }
 
-        public abstract object Data { get; }
+        public Node(T data) : this()
+        {
+            this.data = data;
 
-        public void AddNextNode(NodeBase nextNode)
+            #region 数据内容
+
+            m_ContentUI = new Inspector();
+            m_ContentUI.AddToClassList("content");
+            m_ContentUI.Bind(data);
+
+            #endregion
+
+            Add(m_ContentUI);
+        }
+
+        public void AddNextNode(Node<T> nextNode)
         {
             this.m_NextNodes.Add(nextNode);
             nextNode.m_PrevNodes.Add(this);
         }
 
-        public void RemoveNextNode(NodeBase nextNode)
+        public void RemoveNextNode(Node<T> nextNode)
         {
             this.m_NextNodes.Remove(nextNode);
             nextNode.m_PrevNodes.Remove(this);
@@ -167,14 +157,14 @@ namespace XFramework.StoryKit
         /// <summary>
         /// 获取所有的后续节点
         /// </summary>
-        public NodeBase[] GetNextNodes()
+        public Node<T>[] GetNextNodes()
         {
             return m_NextNodes.ToArray();
         }
 
         public void DrawConnectLine()
         {
-            NodeBase waitRemoved = null;
+            Node<T> waitRemoved = null;
 
             foreach (var item in m_NextNodes)
             {
@@ -211,25 +201,25 @@ namespace XFramework.StoryKit
         }
     }
 
-    public class Node<T> : NodeBase
-    {
-        public T data { get; private set; }
+    //public class Node<T> : NodeBase
+    //{
+    //    public T data { get; private set; }
 
-        public override object Data => data;
+    //    public override object Data => data;
 
-        public Node(T data) : base()
-        {
-            this.data = data;
+    //    public Node(T data) : base()
+    //    {
+    //        this.data = data;
 
-            #region 数据内容
+    //        #region 数据内容
 
-            m_ContentUI = new Inspector();
-            m_ContentUI.AddToClassList("content");
-            m_ContentUI.Bind(data);
+    //        m_ContentUI = new Inspector();
+    //        m_ContentUI.AddToClassList("content");
+    //        m_ContentUI.Bind(data);
 
-            #endregion
+    //        #endregion
 
-            Add(m_ContentUI);
-        }
-    }
+    //        Add(m_ContentUI);
+    //    }
+    //}
 }
