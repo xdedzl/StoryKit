@@ -11,7 +11,7 @@ namespace XFramework.StoryKit
         public static void ShowExample()
         {
             var window = GetWindow<StoryKitWindow>();
-            window.minSize = new Vector2(450, 514);
+            window.minSize = new Vector2(800, 400);
             window.titleContent = new GUIContent("StoryKit");
         }
 

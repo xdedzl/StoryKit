@@ -1,13 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace XFramework.UI
 {
     public class TexturePathElement : AssetPathElement<Texture>
     {
-        //private Image preview;
+        private Image preview;
 
         public TexturePathElement()
         {
@@ -23,27 +21,27 @@ namespace XFramework.UI
                 }
             };
 
-            //preview = new Image
-            //{
-            //    scaleMode = ScaleMode.StretchToFill,
-            //};
+            preview = new Image
+            {
+                scaleMode = ScaleMode.StretchToFill,
+            };
             title.Add(variableNameText);
             title.Add(assetFiled);
             this.Add(title);
-            //this.Add(preview);
+            this.Add(preview);
 
             variableNameText.RegisterCallback<MouseDownEvent>((v) =>
             {
                 if (v.button == 0 && v.clickCount == 2)
                 {
-                    //if (Contains(preview))
-                    //{
-                    //    Remove(preview);
-                    //}
-                    //else
-                    //{
-                    //    Add(preview);
-                    //}
+                    if (Contains(preview))
+                    {
+                        Remove(preview);
+                    }
+                    else
+                    {
+                        Add(preview);
+                    }
                 }
             });
         }
@@ -52,18 +50,19 @@ namespace XFramework.UI
         {
             base.OnAssetChange(texture);
 
-            //if(texture != null)
-            //{
-            //    float ratio = (float)texture.height / texture.width;
+            preview.image = texture;
 
-            //    preview.style.height = preview.layout.width * ratio;
-            //}
-            //else
-            //{
-            //    preview.style.height = 0;
-            //}
+            if (texture != null)
+            {
+                float ratio = (float)texture.height / texture.width;
 
-            //preview.image = texture;
+                preview.style.height = preview.layout.width * ratio;
+            }
+            else
+            {
+                preview.style.height = 0;
+            }
+
         }
     }
 }

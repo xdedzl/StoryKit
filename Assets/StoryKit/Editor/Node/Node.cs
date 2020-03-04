@@ -21,7 +21,7 @@ namespace XFramework.StoryKit
 
         public T data { get; private set; }
 
-        public Node()
+        private Node()
         {
             m_NextNodes = new List<Node<T>>();
             m_PrevNodes = new List<Node<T>>();
