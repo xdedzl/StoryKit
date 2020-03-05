@@ -19,7 +19,9 @@ namespace XFramework.StoryKit
 
         private VisualElement m_NodeRoot;
 
-        private List<Node<T>> m_NodeList;
+        protected List<Node<T>> m_NodeList;
+
+        protected Toolbar toolbar;
 
         [ContextMenu("dsad")]
         private void TTT()
@@ -27,7 +29,7 @@ namespace XFramework.StoryKit
             Debug.Log(564);
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             m_NodeList = new List<Node<T>>();
 
@@ -38,7 +40,7 @@ namespace XFramework.StoryKit
             root.styleSheets.Add(nodeStyle);
             root.styleSheets.Add(inspectorStyle);
 
-            Toolbar toolbar = new Toolbar();
+            toolbar = new Toolbar();
             ToolbarButton openBtn = new ToolbarButton();
             openBtn.text = "OpenAsset";
             openBtn.clicked += OpenAsset;
@@ -148,7 +150,7 @@ namespace XFramework.StoryKit
         /// <returns></returns>
         protected Node<T> CreateNode(Type type, Vector2 pos)
         {
-            var data = CreateData(type);
+            CreateData(type, out T data);
             return CreateNode(data, pos);
         }
 
@@ -169,18 +171,6 @@ namespace XFramework.StoryKit
             m_NodeList.Add(node);
             m_NodeRoot.Add(node);
             return node;
-        }
-
-        /// <summary>
-        /// 根据类型创建一条数据
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private T CreateData(Type type)
-        {
-            T data = (T)Activator.CreateInstance(type);
-            OnDataInstantiat(data);
-            return data;
         }
 
         /// <summary>
@@ -282,19 +272,7 @@ namespace XFramework.StoryKit
 
             if (string.IsNullOrEmpty(fileName)) return;
 
-            var serializableNodeDatas = new List<SerializableNodeData<T>>();
-            foreach (var node in m_NodeList)
-            {
-                OnSave(node);
-                serializableNodeDatas.Add(new SerializableNodeData<T>
-                {
-                    postion = node.transform.position,
-                    data = node.data
-                });
-            }
-
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(serializableNodeDatas);
-            System.IO.File.WriteAllText(fileName, json);
+            OnSave(fileName);
 
             Debug.Log("Save successfully");
         }
@@ -308,30 +286,22 @@ namespace XFramework.StoryKit
 
             if (string.IsNullOrEmpty(fileName)) return;
 
-            string json = System.IO.File.ReadAllText(fileName);
+            OnOpen(fileName);
 
-            var datas = Newtonsoft.Json.JsonConvert.DeserializeObject<SerializableNodeData<T>[]>(json);
-
-            foreach (var item in datas)
-            {
-                Node<T> node = CreateNode(item.data, item.postion);
-            }
-
-            OnOpen(m_NodeList.ToArray());
+            Debug.Log("Open successfully");
         }
 
         #endregion
 
         #region 自定义
 
-        protected virtual void OnDataInstantiat(T data)
-        {
+        protected abstract void CreateData(Type type, out T data);
 
-        }
+        protected virtual void OnSave(string path) { }
 
-        protected virtual void OnSave(Node<T> node) { }
+        protected virtual void OnOpen(string path) { }
 
-        protected virtual void OnOpen(Node<T>[] nodeDatas) { }
+        public virtual void OnNodeDelete(T data) { }
 
         #endregion
     }

@@ -34,7 +34,7 @@
 }
 
 Node{
-	width: 170;
+	width: 200;
 	flex-direction: column;
 	border-width: 1px;
 	background-color: rgba(40, 41, 44, 0.836);

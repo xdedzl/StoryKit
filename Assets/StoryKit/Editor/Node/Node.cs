@@ -152,6 +152,8 @@ namespace XFramework.StoryKit
             }
             m_PrevNodes.Clear();
             this.RemoveFromHierarchy();
+
+            NodeWindow.OnNodeDelete(data);
         }
 
         /// <summary>
