@@ -85,6 +85,16 @@ namespace XFramework.StoryKit
             return quary;
         }
 
+        public StoryDataBase GetStory(int id)
+        {
+            if(m_storyDic.TryGetValue(id, out StoryDataBase storyData))
+            {
+                return storyData;
+            }
+
+            throw new Exception($"没有id为{id}的Story");
+        }
+
         #region Static 调用
 
         #endregion

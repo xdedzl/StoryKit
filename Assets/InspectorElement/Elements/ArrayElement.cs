@@ -12,7 +12,6 @@ namespace XFramework.UI
         private bool IsArray { get { return BoundVariableType.IsArray; } }
 
         private TextField sizeInput;
-        private VisualElement elementsContent;
 
         private int Length
         {
@@ -31,26 +30,11 @@ namespace XFramework.UI
 
         public ArrayElement()
         {
-            this.Remove(variableNameText);
-
-            VisualElement title = new VisualElement
-            {
-                style =
-                {
-                    flexDirection = FlexDirection.Row,
-                }
-            };
             sizeInput = new TextField();
 
-            title.Add(variableNameText);
             title.Add(sizeInput);
 
-            this.Add(title);
-
-            elementsContent = new VisualElement();
-            this.Add(elementsContent);
-
-            sizeInput.RegisterValueChangedCallback<string>(OnSizeChange);
+            sizeInput.RegisterValueChangedCallback(OnSizeChange);
 
             this.AddToClassList("array-element");
             sizeInput.AddToClassList("input");
@@ -84,6 +68,7 @@ namespace XFramework.UI
                         _array.SetValue(value, index);
                         Value = _array;
                     });
+                    elementDrawer.Refresh();
 
                     elementsContent.Add(elementDrawer);
                 }
@@ -104,6 +89,7 @@ namespace XFramework.UI
                         _list[j] = value;
                         Value = _list;
                     });
+                    elementDrawer.Refresh();
 
                     elementsContent.Add(elementDrawer);
                 }
@@ -130,6 +116,12 @@ namespace XFramework.UI
                         {
                             if (array != null)
                                 Array.ConstrainedCopy(array, 0, newArray, 0, currLength);
+
+                            for (int i = size - currLength; i < currLength; i++)
+                            {
+                                object v = Activator.CreateInstance(BoundVariableType);
+                                newArray.SetValue(v, i);
+                            }
                         }
                         else
                             Array.ConstrainedCopy(array, 0, newArray, 0, size);
@@ -160,6 +152,10 @@ namespace XFramework.UI
 
                     Refresh();
                 }
+            }
+            else if(string.IsNullOrEmpty(input.newValue))
+            {
+                sizeInput.value = "0";
             }
             else
             {

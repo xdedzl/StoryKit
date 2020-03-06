@@ -23,7 +23,7 @@ namespace XFramework.UI
                     var element = CreateItemForMember(member, Depth + 1);
                     element.BindTo(this, member, proertyName);
                     element.Refresh();
-                    this.Add(element);
+                    elementsContent.Add(element);
                 }
             }
 
@@ -40,7 +40,7 @@ namespace XFramework.UI
                         var element = CreateItemForMember(member, Depth + 1);
                         element.BindTo(this, member, proertyName);
                         element.Refresh();
-                        this.Add(element);
+                        elementsContent.Add(element);
                     }
                 }
             }
