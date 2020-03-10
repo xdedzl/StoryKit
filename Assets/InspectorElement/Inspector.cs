@@ -106,6 +106,20 @@ namespace XFramework.UI
             return element;
         }
 
+        /// <summary>
+        /// 创建一个数组元素自定义的ArrayElement
+        /// </summary>
+        /// <param name="customerType"></param>
+        /// <param name="depth"></param>
+        /// <returns></returns>
+        public InspectorElement CreateCustomerArrayElemnet(Type customerType, int depth)
+        {
+            InspectorElement element = Activator.CreateInstance(typeof(ArrayElement), customerType) as InspectorElement;
+            element.Inspector = this;
+            element.Depth = depth;
+            return element;
+        }
+
         private Type[] GetSonTypes(Type typeBase, string assemblyName = "Assembly-CSharp")
         {
             List<Type> typeNames = new List<Type>();

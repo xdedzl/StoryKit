@@ -1,4 +1,5 @@
-﻿/*
+﻿using XFramework.UI;
+/*
 * 所有依赖剧情的可配置数据
 */
 namespace Casket
@@ -22,6 +23,7 @@ namespace Casket
         /// <summary>
         /// CG图集
         /// </summary>
+        [ArrayCustomrElement(typeof(TexturePathElement))]
         public string[] images;
         /// <summary>
         /// 内容
@@ -41,22 +43,27 @@ namespace Casket
         /// <summary>
         /// 来时对话id
         /// </summary>
+        [ElementProperty("来时对话")]
         public int dialogId_c;
         /// <summary>
         /// 出货正确的对话
         /// </summary>
+        [ElementProperty("出货正确的对话")]
         public int dialogId_gr;
         /// <summary>
         /// 出货错误的对话
         /// </summary>
+        [ElementProperty("出货错误的对话")]
         public int dialogId_gw;
         /// <summary>
         /// 找钱正确的对话
         /// </summary>
+        [ElementProperty("找钱正确的对话")]
         public int dialogId_cr;
         /// <summary>
         /// 找钱错误的对话
         /// </summary>
+        [ElementProperty("找钱错误的对话")]
         public int dialogId_cw;
         /// <summary>
         /// 出货正确跳转

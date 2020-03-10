@@ -28,7 +28,6 @@ namespace XFramework.UI
             title.Add(variableNameText);
             title.Add(assetFiled);
             this.Add(title);
-            this.Add(preview);
 
             variableNameText.RegisterCallback<MouseDownEvent>((v) =>
             {
@@ -41,6 +40,7 @@ namespace XFramework.UI
                     else
                     {
                         Add(preview);
+                        RefreshPreview();
                     }
                 }
             });
@@ -51,18 +51,21 @@ namespace XFramework.UI
             base.OnAssetChange(texture);
 
             preview.image = texture;
+            RefreshPreview();
+        }
 
+        private void RefreshPreview()
+        {
+            Texture texture = preview.image;
             if (texture != null)
             {
                 float ratio = (float)texture.height / texture.width;
-
                 preview.style.height = preview.layout.width * ratio;
             }
             else
             {
                 preview.style.height = 0;
             }
-
         }
     }
 }

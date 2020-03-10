@@ -21,6 +21,15 @@ namespace XFramework.UI
     }
 
     /// <summary>
+    /// 定义自定义Element类型
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
+    public class ArrayCustomrElementAttribute : CustomerElementAttribute
+    {
+        public ArrayCustomrElementAttribute(Type type) : base(type) { }
+    }
+
+    /// <summary>
     /// 定义变量在UI上的显示名称
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]

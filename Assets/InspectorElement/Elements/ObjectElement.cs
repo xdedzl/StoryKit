@@ -63,7 +63,10 @@ namespace XFramework.UI
 
             if (attribute != null && attribute.type != null)
             {
-                return Inspector.CreateDrawerForType(attribute.type, depth);
+                if (attribute is ArrayCustomrElementAttribute)
+                    return Inspector.CreateCustomerArrayElemnet(attribute.type, depth);
+                else
+                    return Inspector.CreateDrawerForType(attribute.type, depth);
             }
             else
             {

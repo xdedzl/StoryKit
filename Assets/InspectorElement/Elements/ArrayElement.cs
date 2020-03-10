@@ -12,6 +12,7 @@ namespace XFramework.UI
         private bool IsArray { get { return BoundVariableType.IsArray; } }
 
         private TextField sizeInput;
+        private Type customerElementType;
 
         private int Length
         {
@@ -40,6 +41,11 @@ namespace XFramework.UI
             sizeInput.AddToClassList("input");
         }
 
+        public ArrayElement(Type type) : this()
+        {
+            customerElementType = type;
+        }
+
         protected override void OnBound()
         {
             base.OnBound();
@@ -57,7 +63,7 @@ namespace XFramework.UI
                 Array array = (Array)Value;
                 for (int i = 0; i < array.Length; i++)
                 {
-                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType, Depth + 1);
+                    InspectorElement elementDrawer = CreateDrawerForMemberType();
                     if (elementDrawer == null)
                         break;
 
@@ -78,7 +84,7 @@ namespace XFramework.UI
                 IList list = (IList)Value;
                 for (int i = 0; i < list.Count; i++)
                 {
-                    InspectorElement elementDrawer = Inspector.CreateDrawerForMemberType(elementType, Depth + 1);
+                    InspectorElement elementDrawer = CreateDrawerForMemberType();
                     if (elementDrawer == null)
                         break;
 
@@ -99,6 +105,18 @@ namespace XFramework.UI
         protected override void ClearElements()
         {
             elementsContent.Clear();
+        }
+
+        private InspectorElement CreateDrawerForMemberType()
+        {
+            if(customerElementType != null)
+            {
+                return Inspector.CreateDrawerForType(customerElementType, Depth + 1);
+            }
+            else
+            {
+                return Inspector.CreateDrawerForMemberType(elementType, Depth + 1);
+            }
         }
 
         private void OnSizeChange(ChangeEvent<string> input)

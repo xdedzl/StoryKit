@@ -27,6 +27,7 @@ namespace XFramework.StoryKit
                 text = "修改/查看",
             };
             title.Add(addBtn);
+            addBtn.AddToClassList("input");
 
             this.Add(title);
         }
@@ -47,7 +48,7 @@ namespace XFramework.StoryKit
                         borderTopRightRadius = new StyleLength(5),
                     },
                 };
-                storyPreview.transform.position = this.transform.position + new Vector3(200, 0, 0);
+                storyPreview.transform.position = this.transform.position + new Vector3(300, 0, 0);
             }
 
             if (!Contains(storyPreview))
