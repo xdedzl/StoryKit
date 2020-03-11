@@ -12,7 +12,7 @@ namespace XFramework.UI
         private bool IsArray { get { return BoundVariableType.IsArray; } }
 
         private TextField sizeInput;
-        private Type customerElementType;
+        private CustomerElementAttribute customerAttribute;
 
         private int Length
         {
@@ -41,9 +41,9 @@ namespace XFramework.UI
             sizeInput.AddToClassList("input");
         }
 
-        public ArrayElement(Type type) : this()
+        public ArrayElement(CustomerElementAttribute type) : this()
         {
-            customerElementType = type;
+            customerAttribute = type;
         }
 
         protected override void OnBound()
@@ -109,9 +109,9 @@ namespace XFramework.UI
 
         private InspectorElement CreateDrawerForMemberType()
         {
-            if(customerElementType != null)
+            if(customerAttribute != null)
             {
-                return Inspector.CreateDrawerForType(customerElementType, Depth + 1);
+                return Inspector.CreateDrawerForType(customerAttribute.type, Depth + 1, customerAttribute.args);
             }
             else
             {

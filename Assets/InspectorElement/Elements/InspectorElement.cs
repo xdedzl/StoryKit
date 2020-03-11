@@ -74,6 +74,7 @@ namespace XFramework.UI
                 m_depth = value;
                 if (variableNameText != null)
                     variableNameText.transform.position = new Vector2(10 * Depth, 0f);
+                OnDepthChange(value);
             }
         }
 
@@ -191,6 +192,11 @@ namespace XFramework.UI
         protected virtual void OnUnBound()
         {
             m_value = null;
+        }
+
+        protected virtual void OnDepthChange(int depth)
+        {
+
         }
     }
 }

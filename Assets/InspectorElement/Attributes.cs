@@ -9,14 +9,16 @@ namespace XFramework.UI
     public class CustomerElementAttribute : Attribute
     {
         public Type type;
+        public object[] args;
 
-        public CustomerElementAttribute(Type type)
+        public CustomerElementAttribute(Type type, params object[] args)
         {
             if (type != null && !type.IsSubclassOf(typeof(InspectorElement)))
             {
                 throw new Exception($"参数type必须为{typeof(InspectorElement).Name}的派生类   type{type.Name}");
             }
             this.type = type;
+            this.args = args;
         }
     }
 
@@ -26,7 +28,7 @@ namespace XFramework.UI
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class ArrayCustomrElementAttribute : CustomerElementAttribute
     {
-        public ArrayCustomrElementAttribute(Type type) : base(type) { }
+        public ArrayCustomrElementAttribute(Type type, params object[] args) : base(type, args) { }
     }
 
     /// <summary>
@@ -51,7 +53,7 @@ namespace XFramework.UI
     /// <summary>
     /// 定义该Element型支持的类型
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class DefaultSportTypesAttribute : Attribute
     {
         public Type[] types;
@@ -64,7 +66,7 @@ namespace XFramework.UI
     /// <summary>
     /// 定义该Element型支持的类型
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public class SupportHelperAttribute : Attribute
     {
         public ISupport support;

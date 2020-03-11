@@ -76,6 +76,7 @@ namespace Casket
         /// <summary>
         /// 内容
         /// </summary>
+        [ArrayCustomrElement(typeof(TextArea), 50)]
         public string[] contents;
     }
 

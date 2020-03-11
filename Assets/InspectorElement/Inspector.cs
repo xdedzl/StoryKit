@@ -57,7 +57,8 @@ namespace XFramework.UI
                 return;
             }
 
-            InspectorElement uiItem = CreateDrawerForMemberType(obj.GetType(), -1);
+            ObjectElement uiItem = CreateDrawerForType(typeof(ObjectElement), -1) as ObjectElement;
+            uiItem.SetArrowActive(false);
             this.Add(uiItem); 
             if (uiItem != null)
             {
@@ -98,9 +99,9 @@ namespace XFramework.UI
         /// <param name="elementType"></param>
         /// <param name="drawerParent"></param>
         /// <returns></returns>
-        public InspectorElement CreateDrawerForType(Type elementType, int depth)
+        public InspectorElement CreateDrawerForType(Type elementType, int depth, params object[] args)
         {
-            InspectorElement element = Activator.CreateInstance(elementType) as InspectorElement;
+            InspectorElement element = Activator.CreateInstance(elementType, args) as InspectorElement;
             element.Inspector = this;
             element.Depth = depth;
             return element;
@@ -109,12 +110,12 @@ namespace XFramework.UI
         /// <summary>
         /// 创建一个数组元素自定义的ArrayElement
         /// </summary>
-        /// <param name="customerType"></param>
+        /// <param name="customerAttribute"></param>
         /// <param name="depth"></param>
         /// <returns></returns>
-        public InspectorElement CreateCustomerArrayElemnet(Type customerType, int depth)
+        public InspectorElement CreateCustomerArrayElemnet(CustomerElementAttribute customerAttribute, int depth)
         {
-            InspectorElement element = Activator.CreateInstance(typeof(ArrayElement), customerType) as InspectorElement;
+            InspectorElement element = Activator.CreateInstance(typeof(ArrayElement), customerAttribute) as InspectorElement;
             element.Inspector = this;
             element.Depth = depth;
             return element;

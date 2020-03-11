@@ -1,11 +1,12 @@
 ﻿using UnityEngine.UIElements;
+using UnityEngine;
 
 namespace XFramework.UI
 {
     public abstract class ExpandableElement : InspectorElement
     {
+        private Foldout foldout;
         protected VisualElement title;
-
         protected VisualElement elementsContent;
 
         public ExpandableElement()
@@ -18,27 +19,29 @@ namespace XFramework.UI
                     flexDirection = FlexDirection.Row,
                 }
             };
-            var arrow = new Toggle()
+            foldout = new Foldout()
             {
                 //style =
                 //{
-                //    width = 8,
+                //    color = new StyleColor(Color.white),
                 //}
             };
-            arrow.value = true;
-            arrow.RegisterValueChangedCallback((e) =>
+            foldout.value = true;
+            foldout.RegisterValueChangedCallback((e) =>
             {
                 if (e.newValue)
                 {
-                    Refresh();
+                    this.Add(elementsContent);
                 }
                 else
                 {
-                    elementsContent.Clear();
+                    this.Remove(elementsContent);
                 }
             });
-            title.Add(arrow);
+            title.Add(foldout);
             title.Add(variableNameText);
+            foldout.style.right = 18;
+            variableNameText.style.right = 18;
 
             elementsContent = new VisualElement();
 
@@ -61,6 +64,23 @@ namespace XFramework.UI
         protected virtual void ClearElements()
         {
 
+        }
+
+        public void SetArrowActive(bool value)
+        {
+            if (value && !title.Contains(foldout))
+            {
+                title.Insert(0, foldout);
+            }
+            else if(!value && title.Contains(foldout))
+            {
+                title.Remove(foldout);
+            }
+        }
+
+        protected override void OnDepthChange(int depth)
+        {
+            foldout.transform.position = new Vector2(10 * Depth, 0f);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace XFramework.UI
     [DefaultSportTypes(typeof(string))]
     public class StringElement : InspectorElement
     {
-        private TextField input;
+        protected TextField input;
 
         public StringElement()
         {
@@ -26,6 +26,25 @@ namespace XFramework.UI
         private void OnValueChanged(ChangeEvent<string> v)
         {
             Value = v.newValue;
+        }
+    }
+
+    public class TextArea : StringElement
+    {
+        public TextArea() : base()
+        {
+            input.AddToClassList("text-area-element");
+            input.multiline = true;
+            input.style.whiteSpace = WhiteSpace.Normal;
+            input.ElementAt(0).style.unityTextAlign = UnityEngine.TextAnchor.UpperLeft;
+        }
+
+        public TextArea(int minHeight) : this()
+        {
+            if (minHeight > 0)
+            {
+                input.style.minHeight = minHeight;
+            }
         }
     }
 }
