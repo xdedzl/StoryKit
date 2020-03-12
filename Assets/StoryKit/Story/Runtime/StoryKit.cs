@@ -4,18 +4,18 @@ using System.Linq;
 
 namespace XFramework.StoryKit
 {
-    public class StoryManager
+    public class StoryKit
     {
         #region 单例
 
-        private static StoryManager m_instance;
+        private static StoryKit m_instance;
 
-        public static StoryManager instance
+        public static StoryKit instance
         {
             get
             {
                 if (m_instance == null)
-                    m_instance = new StoryManager();
+                    m_instance = new StoryKit();
                 return m_instance;
             }
         }
@@ -34,7 +34,7 @@ namespace XFramework.StoryKit
 
         private Dictionary<int, StoryDataBase> m_storyDic = new Dictionary<int, StoryDataBase>();
 
-        private StoryManager()
+        private StoryKit()
         {
 
         }

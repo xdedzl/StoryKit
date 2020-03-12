@@ -91,7 +91,7 @@ namespace XFramework.UI
                 result = temp;
                 type = type.BaseType;
             }
-            while (type != typeof(NodeData).BaseType);
+            while (type != typeof(System.Object) && type != typeof(System.ValueType));
 
             return result;
         }

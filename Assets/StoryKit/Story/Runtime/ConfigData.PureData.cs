@@ -47,7 +47,7 @@ namespace Casket
     /// <summary>
     /// 电话数据
     /// </summary>
-    public class PhoneData : ConfigData
+    public struct PhoneData : IConfigData<string>
     {
         /// <summary>
         /// 名称
@@ -58,9 +58,11 @@ namespace Casket
         /// </summary>
         public string number;
 
+        public string Key => name;
+
         public override string ToString()
         {
-            return string.Format("Id:{0},Name:{1},Number:{2}", id, name, number);
+            return string.Format("Name:{0},Number:{1}", name, number);
         }
     }
 

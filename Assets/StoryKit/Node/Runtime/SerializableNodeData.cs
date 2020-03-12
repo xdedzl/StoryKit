@@ -1,58 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-namespace XFramework.JsonConvter
+namespace XFramework.StoryKit
 {
-    /// <summary>
-    /// 用于多态列表的转化
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class PolyListConverter<T> : JsonConverter
+    public class SerializableNodeData<T>
+    {
+        [JsonConverter(typeof(Vector2Converter))]
+        public Vector2 postion;
+        [JsonConverter(typeof(PolyConverter))]
+        public T data;
+    }
+
+    public class Vector2Converter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
             return true;
         }
-
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jObject = JObject.Load(reader);
+            string value = serializer.Deserialize<string>(reader);
 
-            List<T> values = new List<T>();
-
-            foreach (var item in jObject.Properties())
-            {
-                Type type = Type.GetType(item.Name);
-
-                var value = item.Value.ToObject(type);
-
-                values.Add((T)value);
-            }
-
-            return values;
+            string[] v2 = value.Split(',');
+            return new Vector2(float.Parse(v2[0]), float.Parse(v2[1]));
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var values = (List<T>)value;
+            Vector2 v = (Vector2)value;
+            string v3Str = $"{v.x},{v.y}";
 
-            JObject jObject = new JObject();
-
-            foreach (var item in values)
-            {
-                jObject.Add(item.GetType().FullName, JToken.FromObject(item));
-            }
-
-            var p = jObject.Properties();
-            foreach (var item in p)
-            {
-                Debug.Log(item.Name);
-            }
-
-            serializer.Serialize(writer, jObject);
+            serializer.Serialize(writer, v3Str);
         }
     }
 

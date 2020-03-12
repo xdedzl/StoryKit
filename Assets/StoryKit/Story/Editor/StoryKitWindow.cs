@@ -21,12 +21,12 @@ namespace XFramework.StoryKit
 
         protected override void CreateData(Type type, out StoryDataBase data)
         {
-            data = StoryManager.instance.CreateData(type);
+            data = StoryKit.instance.CreateData(type);
         }
 
         public override void OnNodeDelete(StoryDataBase data)
         {
-            StoryManager.instance.DeleteData(data);
+            StoryKit.instance.DeleteData(data);
         }
 
         protected override void OnSave(string path)
@@ -54,7 +54,7 @@ namespace XFramework.StoryKit
 
             foreach (var item in datas)
             {
-                StoryManager.instance.AddData(item.data);
+                StoryKit.instance.AddData(item.data);
                 Node<StoryDataBase> node = CreateNode(item.data, item.postion);
             }
 

@@ -33,8 +33,8 @@ namespace XFramework.StoryKit
         {
             m_NodeList = new List<Node<T>>();
 
-            var nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/Node/Node.uss");
-            var inspectorStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Editor/InspectorElement.uss");
+            var nodeStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/StoryKit/Node/Node.uss");
+            var inspectorStyle = AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/InspectorElement/InspectorElement.uss");
 
             var root = rootVisualElement;
             root.styleSheets.Add(nodeStyle);
@@ -56,7 +56,7 @@ namespace XFramework.StoryKit
                 DrawGrid(20, 0.2f, Color.gray);
                 DrawGrid(100, 0.4f, Color.gray);
 
-                ProcessEvents(Event.current);
+                ProcessEvents(UnityEngine.Event.current);
             });
 
             Node<T>.onNodeDelete += (n) =>
@@ -85,7 +85,7 @@ namespace XFramework.StoryKit
             root.Add(drawLine);
         }
 
-        private void ProcessEvents(Event e)
+        private void ProcessEvents(UnityEngine.Event e)
         {
             drag = Vector2.zero;
 

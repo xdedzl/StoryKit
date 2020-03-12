@@ -45,7 +45,7 @@ namespace XFramework.StoryKit
                     var drawLine = new IMGUIContainer(() =>
                     {
                         Vector2 p1 = this.transform.position;
-                        Vector2 p2 = Event.current.mousePosition;
+                        Vector2 p2 = UnityEngine.Event.current.mousePosition;
                         Handles.DrawBezier(
                             p1,
                             p2,

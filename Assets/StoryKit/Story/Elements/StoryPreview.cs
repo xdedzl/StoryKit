@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -85,11 +84,11 @@ namespace XFramework.StoryKit
 
             foreach (var type in types)
             {
-                toolbarMenu.menu.AppendAction(type.Name, (e) => 
+                toolbarMenu.menu.AppendAction(type.Name, (e) =>
                 {
                     CurrentType = type;
                     toolbarMenu.text = type.Name;
-                }, a =>  CurrentType == type? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
+                }, a => CurrentType == type ? DropdownMenuAction.Status.Checked : DropdownMenuAction.Status.Normal);
             }
             toolbar.Add(toolbarMenu);
 
@@ -133,7 +132,7 @@ namespace XFramework.StoryKit
                 }
             };
 
-            Button confirmBtn = new Button (OnConfirmClick)
+            Button confirmBtn = new Button(OnConfirmClick)
             {
                 text = "Confirm",
                 style =
@@ -160,11 +159,11 @@ namespace XFramework.StoryKit
         private void RefreshList()
         {
             m_scrollView.Clear();
-            var storyDatas = StoryManager.instance.GetStorys(CurrentType, CurrentMatching);
+            var storyDatas = StoryKit.instance.GetStorys(CurrentType, CurrentMatching);
 
             foreach (var story in storyDatas)
             {
-                if(!IsSelected || m_selectedId.Contains(story.id))
+                if (!IsSelected || m_selectedId.Contains(story.id))
                     AddStoryItem(story);
             }
         }
@@ -175,7 +174,7 @@ namespace XFramework.StoryKit
 
             foreach (var id in m_selectedId)
             {
-                var data = StoryManager.instance.GetStory(id);
+                var data = StoryKit.instance.GetStory(id);
                 AddStoryItem(data);
             }
         }
@@ -241,7 +240,7 @@ namespace XFramework.StoryKit
                     AddId(item);
                 }
             }
-            
+
             m_callback = callback;
 
             if (selectedStoryToggle.value)

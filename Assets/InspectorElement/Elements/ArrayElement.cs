@@ -123,6 +123,13 @@ namespace XFramework.UI
         {
             if (int.TryParse(input.newValue, out int size))
             {
+                if(size > 100)
+                {
+                    UnityEngine.Debug.LogWarning("输入的数组长度过大");
+                    sizeInput.value = input.previousValue;
+                    return;
+                }
+
                 if (size != Length && size >= 0)
                 {
                     int currLength = Length;
